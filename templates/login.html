@@ -1,0 +1,72 @@
+<html>
+    <head>
+        <title>Recipe Resolution</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}"></link>    
+        <link rel="stylesheet" href="{{url_for('static', filename='global_style.css')}}"></link>    
+    </head>
+
+    
+
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary">
+                <div class="container-fluid">
+                    
+                    <a class="navbar-brand" href="/">Recipe Resolution</a>
+                    
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/recipes">Recipes</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ingredients">Ingredients</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/creators">Creators</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/login">Login</a>
+                        </li>
+                </div>
+            </nav>
+        </header>
+
+        <content class="container">
+            <h1>Log in</h1>
+            <div class="card p-3">
+
+                <div id="error_message" class="text-danger"></div>
+
+                <div class="input-group my-2">
+                    <label class="input-group-text" for="user">User</label>
+                    <input class="form-control" id="user">
+                </div>
+
+                <div class="input-group my-2">
+                    <label class="input-group-text" for="password">Password</label>
+                    <input class="form-control" id="password">
+                </div>
+
+                <div class="">
+                    <button id="login_btn" type="button" class="btn btn-outline-primary">
+                        Login
+                    </button>
+                    <button id="create_btn" type="button" class="btn btn-outline-secondary">
+                        Create User
+                    </button>
+                </div>
+            </div>
+        </content>
+        
+    </body>
+
+    <script src="{{url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
+    <script src="{{url_for('static', filename='login.js')}}"></script>
+</html>

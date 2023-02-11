@@ -1,0 +1,113 @@
+<html>
+    <head>
+        <title>Recipe Resolution</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}"></link>    
+        <link rel="stylesheet" href="{{url_for('static', filename='global_style.css')}}"></link>    
+    </head>
+
+    
+
+    <body>
+        <header>
+            <nav class="navbar navbar-expand-lg bg-body-tertiary">
+                <div class="container-fluid">
+                    
+                    <a class="navbar-brand" href="/">Recipe Resolution</a>
+                    
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/recipes">Recipes</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/ingredients">Ingredients</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/creators">Creators</a>
+                        </li>
+        
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">Login</a>
+                        </li>
+                </div>
+            </nav>
+        </header>
+
+        <content class="container">
+            <h1>New Recipe</h1>
+            <div class="card p-3">
+                <div class="input-group">
+                    <label for="name" class="input-group-text">Recipe Name</label>
+                    <input id="name" class="form-control">
+                </div>
+
+                <div>
+
+                <form class="form-floating">
+                    <textarea class="form-control" id="description" placeholder="This is my recipe for.... I love this recipe because..."></textarea>
+                    <label for="description">Description</label>
+                </form>
+
+                </div>
+        
+
+
+
+                
+
+                <table id="ingredients_table" class="table table-striped">
+                    <thead>
+                        <th scope="col">Ingredient</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Units</th>
+                    </thead>
+
+                    <tbody id="table_body">
+                        <tr id="hidden_ingredient_template" hidden>
+                            <td>
+                                <select class="form-select ingredient_select" placeholder="Select Ingredient"></select>
+                            </td>
+                            <td>
+                                <input class="form-control" type="number" placeholder="quantity">
+                            </td>
+                            <td>
+                                <input class="form-control" type="text" placeholder="units">
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>
+                                <button id="add_ingredient" type="button" class="btn btn-outline-danger">+</button>
+                            </td>
+                            <td>
+                                Need more ingredient options? Add more at 
+                                <a href="/ingredients" target="blank">Ingredients</a>
+                            </td>
+                            <td>
+                                <button id="refresh_ingredients" class="btn btn-outline-secondary">
+                                    Refresh
+                                </button>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>                
+                
+            </div>
+
+            
+            
+
+        </content>
+        
+    </body>
+
+    <script src="{{url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
+    <script src="{{url_for('static', filename='utility.js')}}"></script>
+    <script src="{{url_for('static', filename='create_recipe.js')}}"></script>
+</html>
