@@ -1,3 +1,5 @@
+// Const to be used across site to simulate data 
+// or perform http request to get data
 const SIMULATE_DATA = true;
 
 let form_row = (data) =>{

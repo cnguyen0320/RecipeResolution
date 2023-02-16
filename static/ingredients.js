@@ -27,6 +27,9 @@ let fill_table = (data) =>{
     }
 }
 
+/**
+ * Gets recipe data and calls fill_table
+ */
 let get_data = () =>{
     if (SIMULATE_DATA){
         let simulated_data = [
@@ -62,8 +65,10 @@ let get_data = () =>{
         fetch("/ingredients", {
             method: "GET"
         })
-        
-        // perform query and then fill table
+        .then(response => response.json())
+        .then(response => { 
+            fill_table(response)
+        })
         
     }
 }

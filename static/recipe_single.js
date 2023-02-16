@@ -63,6 +63,10 @@ if (SIMULATE_DATA){
         fetch("/recipes", {
             method: "GET"
         })
+        .then(response =>response.json())
+        .then(data =>{
+            fill_content(data)
+        })
     }
     
     // first thing to do is to query for recipe data

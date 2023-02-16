@@ -60,16 +60,11 @@ if (SIMULATE_DATA){
     ]
     fill_table(simulated_data)
 }else{
-    let query_users = () =>{
-        return fetch("/users", {
-            method: "GET"
-        })
-    }
-    
-    // query users and fill table
-    query_users()
+    fetch("/users", {
+        method: "GET"
+    })
     .then(response =>response.json())
-    .then(data =>{
+    .then(data => {
         fill_table(data)
     })
 }

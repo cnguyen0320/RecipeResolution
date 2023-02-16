@@ -9,8 +9,16 @@ let fill_menu = (data) =>{
     // create options dropdown list
     let options = document.createElement("div")
     let values = []
+
+    // first create the empty option
+    let option = document.createElement("option")
+    option.value = ""
+    option.innerHTML = "Select an Ingredient..."
+    options.appendChild(option)
+    values.push(option.value)
+
     for(row of data){
-        let option = document.createElement("option")
+        option = document.createElement("option")
         option.value= row.id,
         option.innerHTML = row.name
         
