@@ -47,6 +47,7 @@ if (SIMULATE_DATA){
         "name": "Ice cream sundae",
         "description": "An ice cream sundae is the best type of dessert.\nYou can fill it with whatever you want, but here are my favorites!",
         "creator": "John Snow",
+        "creator_id": 0,
         "date": "2020-11-08",
         "ingredients": [
             {id:78, name: "Vanilla Ice Cream", quantity:1, unit:"scoop", required: true},
@@ -65,6 +66,8 @@ if (SIMULATE_DATA){
         })
         .then(response =>response.json())
         .then(data =>{
+            // if creator id matches the current user
+
             fill_content(data)
         })
     }
@@ -73,3 +76,14 @@ if (SIMULATE_DATA){
     
 }
 
+// set up delete button if it is rendered
+try{
+    document.getElementById("delete_btn").addEventListener("click", ()=>{
+        fetch(`/recipe/${recipe_id}`, {
+            method: "DELETE"
+        })
+        .then(response => {
+            window.location = "/recipes"
+        })
+    })
+}catch{}

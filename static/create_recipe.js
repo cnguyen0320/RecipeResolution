@@ -31,10 +31,10 @@ let fill_menu = (data) =>{
     let template_node = document.getElementById("hidden_ingredient_template").getElementsByClassName("ingredient_select")[0]
     
     template_node.innerHTML = options.innerHTML
-    console.log(template_node)
 
     let select_elements = document.getElementsByClassName("ingredient_select")
-    for(element in select_elements){
+    for(element of select_elements){
+        console.log(element)
         // capture the current value to not overwrite
         let old_value = element.value
         
@@ -90,6 +90,8 @@ let get_data = () =>{
         fetch("/ingredients", {
             method: "GET"
         })
+        .then(response => response.json())
+        .then(data => fill_menu(data))
         
         // perform query and then fill table
         
@@ -123,3 +125,56 @@ document.getElementById("add_ingredient").addEventListener("click", add_ingredie
 
 // refresh input list on button press
 document.getElementById("refresh_ingredients").addEventListener("click", get_data)
+
+
+// allow for POST/PUT to create/update recipe
+let _page_create = true
+const index_start = document.location.pathname.lastIndexOf("/")
+const recipe_id = document.location.pathname.substring(index_start+1)
+if(document.location.pathname.match("edit") != null){
+    _page_create = false
+}
+document.getElementById("submit_btn").addEventListener("click", ()=>{
+    let name = document.getElementById("name").value
+    let description = document.getElementById("description").value
+
+    let ingredients = Array()
+
+    // loop over all ingredients on the page
+    let ingredient_options = document.getElementsByClassName("ingredient_select")
+    for(ingredient of ingredient_options){
+        // go up two levels to get the parent
+        let row = ingredient.parentNode.parentNode
+
+        // create the object for array
+        let ingredient_item = Object()
+        ingredient_item.id = ingredient.value
+        ingredient_item.quantity = row.getElementsByClassName("ingredient_quantity")[0]
+        ingredient_item.unit = row.getElementsByClassName("ingredient_quantity")[0]
+
+        ingredients.push(ingredient_item)
+    }
+
+    let url = "/recipe"
+    let options = {
+        headers: {
+            'Content-Type': 'application/json'
+            },
+        body: JSON.stringify({
+            name: name,
+            description: description,
+            ingredients: ingredients
+        })
+    }
+
+    // modify the method and URL depending on whether we are editing
+    if (_page_create){
+        options.method = "POST"
+    }else{
+        options.method = "PUT"
+        url = `/recipe/${recipe_id}`
+    }
+
+    fetch(url, options)
+    
+})

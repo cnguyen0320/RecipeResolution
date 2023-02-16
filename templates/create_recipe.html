@@ -32,10 +32,10 @@
                         </li>
         
                         <li class="nav-item">
-                            {% if user_id is not None %}
-                            <a class="nav-link active" href="/logout">Logout</a>
+                            {% if user_id != None %}
+                            <a class="nav-link " href="/logout">Logout</a>
                             {% else %}
-                            <a class="nav-link active" href="/login">Login</a>
+                            <a class="nav-link " href="/login">Login</a>
                             {% endif %}
                         </li>
                 </div>
@@ -47,14 +47,14 @@
             <div class="card p-3">
                 <div class="input-group">
                     <label for="name" class="input-group-text">Recipe Name</label>
-                    <input id="name" class="form-control">
+                    <input id="name" class="form-control" {% if recipe %} value="{{recipe.name}}" {% endif%}>
                 </div>
 
                 <div>
 
                 <form class="form-floating my-2">
-                    <textarea class="form-control" id="description" placeholder="" style="min-height:35vh"></textarea>
-                    <label for="description">Description</label>
+                    <textarea class="form-control" id="description" placeholder="" style="min-height:35vh">{% if recipe %}{{recipe.description}} {% endif%}</textarea>
+                    <label for="description" >Description</label>
                 </form>
 
                 </div>
@@ -72,13 +72,31 @@
                                 <select class="form-select ingredient_select" placeholder="Select Ingredient"></select>
                             </td>
                             <td>
-                                <input class="form-control" type="number" placeholder="quantity">
+                                <input class="form-control" type="number" min="0" placeholder="#">
                             </td>
                             <td>
                                 <input class="form-control" type="text" placeholder="units">
                             </td>
                             
                         </tr>
+
+                        {% if recipe %}
+                        {% for ingredient in recipe.ingredients %}
+
+                        <tr>
+                            <td>
+                                <select class="form-select ingredient_select" placeholder="Select Ingredient" value="{{ ingredient.id }}"><option value={{ingredient.id}}>placeholder</option></select>
+                            </td>
+                            <td>
+                                <input class="form-control ingredient_quantity" type="number" min="0" placeholder="#" value="{{ingredient.quantity}}">
+                            </td>
+                            <td>
+                                <input class="form-control ingredient_unit" type="text" placeholder="units" value="{{ingredient.units}}">
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+                        {% endif %}
                     </tbody>
                     <tfoot>
                         <tr>
@@ -99,10 +117,11 @@
                 </table>                
             
                 <div class="my-2">
-                    <button id="create_btn" class="btn btn-primary">
-                        Create
+                    <button id="submit_btn" class="btn btn-primary">
+                        Submit
                     </button>
                 </div>
+
             </div>
 
             
