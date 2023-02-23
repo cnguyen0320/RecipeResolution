@@ -9,6 +9,7 @@ let fill_table = (data) =>{
 
     for(row of data){
         let row_element = form_row([
+            row.id, 
             row.name, 
             row.recipe_count, 
         ])

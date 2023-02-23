@@ -1,5 +1,8 @@
 <html>
     <head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
         <title>Recipe Resolution</title>
         <link rel="stylesheet" href="{{url_for('static', filename='bootstrap.min.css')}}"></link>    
         <link rel="stylesheet" href="{{url_for('static', filename='global_style.css')}}"></link>    
@@ -43,8 +46,14 @@
         </header>
 
         <content class="container">
+            {% if recipe %}
+            <h1>Modify Recipe</h1>
+            
+            {%else%}
             <h1>New Recipe</h1>
+            {%endif%}
             <div class="card p-3">
+
                 <div class="input-group">
                     <label for="name" class="input-group-text">Recipe Name</label>
                     <input id="name" class="form-control" {% if recipe %} value="{{recipe.name}}" {% endif%}>

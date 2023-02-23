@@ -7,8 +7,9 @@
 let fill_table = (data) =>{
     for(row of data){
         let row_element = form_row([
+            row.id,
             row.name, 
-            row.recipe_count, 
+            row.recipe_count
         ])
 
         // add a link to the end of the end of the row to go to the recipe

@@ -68,6 +68,13 @@ def ingredient_page():
 def user_page():
     return render_template("creators.html", user_id=session["user_id"] if "user_id" in session else None)
 
+@app.route("/passwords", methods =["GET"])
+def passwords_page():
+    return render_template("passwords.html", user_id=session["user_id"] if "user_id" in session else None)
+
+@app.route("/recipe_components", methods =["GET"])
+def recipe_components_page():
+    return render_template("recipe_components.html", user_id=session["user_id"] if "user_id" in session else None)
 
 
 # API endpoints
