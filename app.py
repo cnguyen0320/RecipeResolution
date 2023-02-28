@@ -135,15 +135,27 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
+
+
 @app.route("/ingredient", methods=["GET"])
 def getIngredients():
-    post_data = request.get_json()
-    result = db_getIngredient()
+    """
+    Gets the ingredients table w/ filter
+    """
+    result = db_getIngredient({
+        "min": request.args.get("min", None),
+        "max": request.args.get("max", None)
+    })
     print(result)
     return jsonify(result)
 
+
+
 @app.route("/ingredient", methods=["POST"])
 def createIngredient():
+    """
+    Creates an Ingredient
+    """
     post_data = request.get_json()
     result = db_createIngredient(post_data["name"])
 
@@ -154,10 +166,29 @@ def createIngredient():
 
 @app.route("/ingredient", methods=["DELETE"])
 def deleteIngredient():
-    
-    return 200
+    """
+    Deletes an ingredient
+    """
+    try:
+        db_deleteIngredient(request.args.get("id", None))
+    except Exception:
+        pass
 
-    return "Ingredient already exists", 204
+    return "ok", 200
+
+@app.route("/ingredient", methods=["PUT"])
+def updateIngredient():
+    """
+    Updates an ingredient
+    """
+    try:
+        post_data = request.get_json()
+        db_updateIngredient(post_data)
+        return "ok", 200
+
+    except Exception:
+        return "error", 404
+
 
 @app.route("/recipe", methods=["POST"])
 def createRecipe():
@@ -217,12 +248,12 @@ def db_getIngredient(filter=None):
     filter_query = ""
     if filter is not None:
         
-        if "min" in filter:
-            filter_query = "WHERE recipeCount >= {}".format(filter["min"])
+        if "min" in filter and filter["min"] is not None:
+            filter_query = "HAVING recipeCount >= {}".format(filter["min"])
         else:
-            filter_query = "WHERE recipeCount >= 0"
+            filter_query = "HAVING recipeCount >= 0"
         
-        if "max" in filter:
+        if "max" in filter and filter["max"] is not None:
             filter_query += " AND recipeCount <= {}".format(filter["max"])
 
     query = """
@@ -230,17 +261,28 @@ def db_getIngredient(filter=None):
     FROM Ingredients 
     LEFT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID 
     GROUP BY Ingredients.ingredientID
-    ORDER BY Ingredients.name
     {}
+    ORDER BY Ingredients.name
     ;
     """.format(filter_query)
     cursor = mysql.connection.cursor()
     cursor.execute(query)
     return  cursor.fetchall()
 
+def db_updateIngredient(filter):
+    query = "UPDATE Ingredients SET name = '{}' WHERE ingredientId = {}".format(filter["name"], filter["id"])
+    print(query)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
 
-
-
+def db_deleteIngredient(id):
+    query = "DELETE FROM Ingredients WHERE ingredientId = {}".format(id)
+    print(query)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+    
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3457)
