@@ -43,7 +43,7 @@ let createUser = ()=>{
         
         // error display error
         if(response.status !== 200){
-            document.getElementById("error_message").innerHTML = "Username is taken"
+            document.getElementById("error_message").innerHTML = "An error occurred. Check for duplicate username or invalid password"
         }else{
             window.location = "/"
         }
@@ -51,4 +51,5 @@ let createUser = ()=>{
 }
 
 document.getElementById("login_btn").addEventListener("click", login)
+document.getElementById("create_btn").addEventListener("click", createUser)
 

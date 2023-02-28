@@ -15,20 +15,20 @@ mysql = MySQL(app)
 # VIEWS
 @app.route('/')
 def home():
-    return render_template('index.html', user_id=session["user_id"] if "user_id" in session else None)
+    return render_template('index.html')
 
 @app.route('/recipes')
 def recipe_view():
-    return render_template('recipes.html', user_id=session["user_id"] if "user_id" in session else None)
+    return render_template('recipes.html')
 
 @app.route("/recipe/<id>", methods=["GET"])
 def recipe_single(id):
     # if ID is create, then direct to create recipe page
     if id == "create":
-        return render_template("create_recipe.html", user_id=session["user_id"] if "user_id" in session else None)
+        return render_template("create_recipe.html")
     else:
         creator_id = 0 # TODO get the creator ID who created the recipe
-        return render_template("recipe.html", user_id=session["user_id"] if "user_id" in session else None, recipe_id=id, creator_id=creator_id)
+        return render_template("recipe.html", recipe_id=id, creator_id=creator_id)
 
 @app.route("/edit/<id>", methods=["GET"])
 def recipe_edit(id):
@@ -57,7 +57,7 @@ def recipe_edit(id):
         ]
     }
     if True: # TODO uncomment -> # "user_id" in session and creator_id == session["user_id"]:
-        return render_template("create_recipe.html", user_id=session["user_id"] if "user_id" in session else None, recipe=recipe)
+        return render_template("create_recipe.html", recipe=recipe)
     
     # return forbidden
     abort(403)
@@ -67,23 +67,23 @@ def login_page():
     # if we get to this page with a session, we should pop the session credentials
     session.clear()
 
-    return render_template("login.html", user_id=session["user_id"] if "user_id" in session else None)
+    return render_template("login.html")
 
 @app.route("/ingredients", methods=["GET"])
 def ingredient_page():
-    return render_template("ingredients.html", user_id=session["user_id"] if "user_id" in session else None)
+    return render_template("ingredients.html")
 
 @app.route("/creators", methods=["GET"])
 def user_page():
-    return render_template("creators.html", user_id=session["user_id"] if "user_id" in session else None)
+    return render_template("creators.html")
 
 @app.route("/passwords", methods =["GET"])
 def passwords_page():
-    return render_template("passwords.html", user_id=session["user_id"] if "user_id" in session else None)
+    return render_template("passwords.html")
 
 @app.route("/recipe_components", methods =["GET"])
 def recipe_components_page():
-    return render_template("recipe_components.html", user_id=session["user_id"] if "user_id" in session else None)
+    return render_template("recipe_components.html", )
 
 
 # API endpoints
@@ -106,7 +106,7 @@ def login():
     return redirect(url_for("home"))
 
 
-@app.route("/createuser", methods=["POST"])
+@app.route("/createUser", methods=["POST"])
 def createUser():
     
     # extract credentials
@@ -121,12 +121,15 @@ def createUser():
     if user_exists:
         return 403
 
-    # TODO create user and password in DB
-
-    # auto log in user and return
-    session['user'] = user
-    session['user_id'] = user_id
-    return 200
+    # create user and password in DB
+    user, user_id = db_createUser(user, password)
+    if user_id:
+        # auto log in user and return
+        session['user'] = user
+        session['user_id'] = user_id
+        return "ok", 200
+    else:
+        return "error", 400
 
 
 @app.route("/logout")
@@ -283,6 +286,34 @@ def db_deleteIngredient(id):
     cursor.execute(query)
     mysql.connection.commit()
     
+
+def db_createUser(name, password):
+    """
+    Create new user and password
+    """
+
+    try:
+        assert(password != "")
+        cursor = mysql.connection.cursor()
+
+        # first query insert the user
+        query = "INSERT INTO Creators (username) VALUES ('{}')".format(name)
+        cursor.execute(query)
+        user_row_id = cursor.lastrowid
+
+        print(user_row_id)
+        # query insert the password        
+        query = "INSERT INTO Passwords (creatorID, password) VALUES ({}, '{}')".format(user_row_id, password)
+        cursor.execute(query)
+
+        # commit at the end to save both user and password
+        mysql.connection.commit()
+
+        return name, user_row_id
+    except Exception as e:
+        print(e)
+        return None, None
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3457)
