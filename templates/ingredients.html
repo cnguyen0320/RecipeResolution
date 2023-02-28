@@ -57,6 +57,14 @@
             <h1>Ingredients</h1>
 
             <div class="card p-3">
+                <div class="input-group mb-3">
+                    <span class="input-group-text">Min Recipe Count</span>
+                    <input id="filter_min" type="number" class="form-control" placeholder="min" min=0 value="0">
+                    <span class="input-group-text">Max Recipe Count</span>
+                    <input id="filter_max" type="text" class="form-control" placeholder="max">
+                    <button id="filter_btn" class="btn btn-outline-success">Filter Ingredients</button>
+                  </div>
+
                 <table id="table" class="table table-striped">
                     <thead>
                         <tr>
@@ -64,6 +72,7 @@
                             <th scope="col">Name</th>
                             <th scope="col">Used in Recipes</th>
                             <th scope="col">View Recipes</th>
+                            <th scope="col">Delete</th>
                         </tr>
                     </thead>
                     <tbody id="table_body">

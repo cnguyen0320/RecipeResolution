@@ -1,7 +1,16 @@
-from flask import Flask, render_template, redirect, session, url_for, request, abort
+from flask import Flask, render_template, redirect, session, url_for, request, abort, jsonify
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 app.secret_key = "RecipeResolution"
+
+app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
+app.config['MYSQL_USER'] = 'cs340_nguyech6'
+app.config['MYSQL_PASSWORD'] = '5055' #last 4 of onid
+app.config['MYSQL_DB'] = 'cs340_nguyech6'
+app.config['MYSQL_CURSORCLASS'] = "DictCursor"
+
+mysql = MySQL(app)
 
 # VIEWS
 @app.route('/')
@@ -126,12 +135,29 @@ def logout():
     session.clear()
     return redirect(url_for('home'))
 
-@app.route("/ingredients", methods=["POST"])
+@app.route("/ingredient", methods=["GET"])
+def getIngredients():
+    post_data = request.get_json()
+    result = db_getIngredient()
+    print(result)
+    return jsonify(result)
+
+@app.route("/ingredient", methods=["POST"])
 def createIngredient():
-    # TODO
+    post_data = request.get_json()
+    result = db_createIngredient(post_data["name"])
+
+    if result:
+        return "ok", 200
+
+    return "An error occurred", 404
+
+@app.route("/ingredient", methods=["DELETE"])
+def deleteIngredient():
+    
     return 200
 
-    return "Ingredient already exists", 404
+    return "Ingredient already exists", 204
 
 @app.route("/recipe", methods=["POST"])
 def createRecipe():
@@ -169,5 +195,52 @@ def deleteRecipe(id):
         abort(403) # forbidden
 
 
+"""
+Controller code lives below here. Since we are using flask-mysqldb, we will keep the model
+and controller in the same file
+"""
+def db_createIngredient(name):
+    # generate the query
+    query = "INSERT INTO Ingredients (name) VALUES ('{}');".format(name)
+
+    # execute the query
+    cursor = mysql.connection.cursor()
+    try:
+        cursor.execute(query)
+        mysql.connection.commit()
+        return True
+    except Exception as e:
+        return False
+
+def db_getIngredient(filter=None):
+    # Generate the filter query
+    filter_query = ""
+    if filter is not None:
+        
+        if "min" in filter:
+            filter_query = "WHERE recipeCount >= {}".format(filter["min"])
+        else:
+            filter_query = "WHERE recipeCount >= 0"
+        
+        if "max" in filter:
+            filter_query += " AND recipeCount <= {}".format(filter["max"])
+
+    query = """
+    SELECT Ingredients.ingredientID AS id, Ingredients.name AS name, COUNT(DISTINCT(RecipeComponents.recipeID)) AS recipeCount
+    FROM Ingredients 
+    LEFT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID 
+    GROUP BY Ingredients.ingredientID
+    ORDER BY Ingredients.name
+    {}
+    ;
+    """.format(filter_query)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    return  cursor.fetchall()
+
+
+
+
+
 if __name__ == '__main__':
-    app.run()
+    app.run(host="0.0.0.0", port=3457)

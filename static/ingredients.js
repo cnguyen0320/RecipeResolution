@@ -9,7 +9,7 @@ let fill_table = (data) =>{
         let row_element = form_row([
             row.id,
             row.name, 
-            row.recipe_count
+            row.recipeCount
         ])
 
         // add a link to the end of the end of the row to go to the recipe
@@ -21,10 +21,32 @@ let fill_table = (data) =>{
         link_column.appendChild(link_element)
         row_element.appendChild(link_column)
 
+        // add a link to the end of the end of the row to go to the recipe
+        let delete_element = document.createElement("button")
+        delete_element.className = "btn btn-danger"
+        delete_element.innerHTML = "Delete"
+        delete_element.onClick = ()=>{
+            fetch(`/ingredient?id=${row.id}`, {
+                method: "DELETE"
+            })
+            .then(response=>{
+                // reload on success
+                if (response.status >= 200 && response.status <300){
+                    location.reload()
+                }else{
+                    alert("An error occurred")
+                }
+            })
+        }
+
+        let delete_column = document.createElement("td")
+        delete_column.appendChild(delete_element)
+        row_element.appendChild(delete_column)
+
+
         // add the row to the table
         let table_body = document.getElementById('table_body')
         table_body.appendChild(row_element)
-
     }
 }
 
@@ -32,46 +54,13 @@ let fill_table = (data) =>{
  * Gets recipe data and calls fill_table
  */
 let get_data = () =>{
-    if (SIMULATE_DATA){
-        let simulated_data = [
-            {
-                "id": 0,
-                "name": "Vanilla ice cream",
-                "recipe_count": 2,
-            },
-            {
-                "id": 1,
-                "name": "Chicken",
-                "recipe_count": 3,
-            },
-            {
-                "id": 2,
-                "name": "Sriloin Steak",
-                "recipe_count": 1,
-            },
-            {
-                "id": 3,
-                "name": "Green beans",
-                "recipe_count": 1,
-            },
-            {
-                "id": 4,
-                "name": "Flour",
-                "recipe_count": 7,
-            },
-        ]
-        fill_table(simulated_data)
-    }else{
-        
-        fetch("/ingredients", {
+        fetch("/ingredient", {
             method: "GET"
         })
         .then(response => response.json())
         .then(response => { 
             fill_table(response)
         })
-        
-    }
 }
 
 /**
@@ -81,7 +70,7 @@ let create_ingredient = (name) =>{
     let body = {
         "name": name
     }
-    fetch('/ingredients',{
+    fetch('/ingredient',{
         method: "POST",
         body: JSON.stringify(body),
         headers: {
@@ -91,15 +80,12 @@ let create_ingredient = (name) =>{
         if(response.status == 200){
 
             // refresh the page on success
+            location.reload()
         }else{
 
             // attempt to get error message from response
             // else use default
             let err_msg = "An error occurred"
-            console.log(response)
-            if(response.statusText){
-                err_msg = response.statusText
-            }
 
             // show error
             document.getElementById("error_message").innerHTML = err_msg
