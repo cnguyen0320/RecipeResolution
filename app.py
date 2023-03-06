@@ -105,7 +105,6 @@ def login():
     # give redirect for home
     return redirect(url_for("home"))
 
-
 @app.route("/createUser", methods=["POST"])
 def createUser():
     
@@ -139,7 +138,6 @@ def logout():
     return redirect(url_for('home'))
 
 
-
 @app.route("/ingredient", methods=["GET"])
 def getIngredients():
     """
@@ -151,7 +149,6 @@ def getIngredients():
     })
     print(result)
     return jsonify(result)
-
 
 
 @app.route("/ingredient", methods=["POST"])
@@ -218,21 +215,19 @@ def updateRecipe(id):
 @app.route("/recipe/<id>", methods=["DELETE"])
 def deleteRecipe(id):
     
-    # TODO Get the recipe and check the creator
-    creator_id = 0
+    # perform delete
+    db_deleteRecipe(id)
+    return "ok", 200
     
-    if "user_id" in session and creator_id == session["user_id"]:
-        #TODO perform delete
-
-        return "ok"
-    else:
-        abort(403) # forbidden
-
 
 """
 Controller code lives below here. Since we are using flask-mysqldb, we will keep the model
 and controller in the same file
 """
+
+#####################################################################
+# Ingredient
+#####################################################################
 def db_createIngredient(name):
     # generate the query
     query = "INSERT INTO Ingredients (name) VALUES ('{}');".format(name)
@@ -274,19 +269,19 @@ def db_getIngredient(filter=None):
 
 def db_updateIngredient(filter):
     query = "UPDATE Ingredients SET name = '{}' WHERE ingredientId = {}".format(filter["name"], filter["id"])
-    print(query)
     cursor = mysql.connection.cursor()
     cursor.execute(query)
     mysql.connection.commit()
 
 def db_deleteIngredient(id):
     query = "DELETE FROM Ingredients WHERE ingredientId = {}".format(id)
-    print(query)
     cursor = mysql.connection.cursor()
     cursor.execute(query)
     mysql.connection.commit()
-    
 
+#####################################################################
+# User & Password
+#####################################################################
 def db_createUser(name, password):
     """
     Create new user and password
@@ -313,6 +308,83 @@ def db_createUser(name, password):
     except Exception as e:
         print(e)
         return None, None
+
+def db_updateUser(id, name):
+    """
+    Update user to update the username
+    """
+    query = "UPDATE Creators SET name = '{}' WHERE creatorID = {}".format(name, id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+def db_updatePassword(id, password):
+    """
+    Update password on user id
+    """
+    query = "UPDATE Passwords SET password = '{}' WHERE creatorID = {}".format(password, id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+def db_deleteUser(id):
+    query = "DELETE FROM Creators WHERE creatorID = {}".format(id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+
+#####################################################################
+# Recipe TODO
+#####################################################################
+def db_createRecipe(recipe):
+    # TODO
+    pass
+
+def db_updateRecipe(recipe):
+    # TODO
+    pass
+
+def db_getRecipe(id):
+    """
+    Get a singular recipe based on ID
+    """
+    # TODO
+    pass
+
+def db_getAllRecipe(filter):
+    """
+    Get all recipes by applying filter
+    """
+    # TODO
+    pass
+
+def db_deleteRecipe(id):
+    query = "DELETE FROM Recipes WHERE recipeID = {}".format(id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+#####################################################################
+# RecipeComponent TODO
+#####################################################################
+def db_createRecipeComponent():
+    # TODO
+    pass
+
+def db_getRecipeComponent():
+    # TODO
+    pass
+
+def db_updateRecipeComponent():
+    # TODO
+    pass
+
+def db_deleteRecipeComponent(id):
+    query = "DELETE FROM RecipeComponents WHERE componentID = {}".format(id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
 
 
 if __name__ == '__main__':
