@@ -6,6 +6,8 @@
  */
 let fill_table = (data) =>{
     
+    let table_body = document.getElementById('table_body')
+    table_body.innerHTML = ""
 
     for(row of data){
         let row_element = form_row([
@@ -14,7 +16,10 @@ let fill_table = (data) =>{
             row.recipe_count, 
         ])
 
-        // add a link to the end of the end of the row to go to the recipe
+
+        //////////////////////////////////////////////////////////////////
+        // add a link to row to go to the recipe
+        //////////////////////////////////////////////////////////////////
         let link_element = document.createElement("a")
         link_element.innerHTML = ("Go to Recipes")
         link_element.href = `/recipes?user=${row.id}`
@@ -23,6 +28,8 @@ let fill_table = (data) =>{
         link_column.appendChild(link_element)
         row_element.appendChild(link_column)
 
+
+        
         // add the row to the table
         let table_body = document.getElementById('table_body')
         table_body.appendChild(row_element)
@@ -61,7 +68,7 @@ if (SIMULATE_DATA){
     ]
     fill_table(simulated_data)
 }else{
-    fetch("/users", {
+    fetch("/creators", {
         method: "GET"
     })
     .then(response =>response.json())
