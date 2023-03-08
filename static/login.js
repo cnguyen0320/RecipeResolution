@@ -1,55 +1,38 @@
 /**
- * Performs login function by POSTing to server
+ * Creates a username and password by POSTing to server
  */
-let login = ()=>{
-    let user = document.getElementById("user").value
-    let password = document.getElementById("password").value
+let createUser = (user, password) => {
     fetch("/login", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-          },
-        body: JSON.stringify({
-            user:user,
-            password:password
-        })
-    }).then(response =>{
-        
-        // error display error
-        if(response.status !== 200){
-            document.getElementById("error_message").innerHTML = "Invalid credentials or user not found"
-        }else{
-            window.location = "/"
-        }
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user: user,
+        password: password,
+      }),
     })
-}
-
-/**
- * Creates a user by POSTing to server
- */
-let createUser = ()=>{
-    let user = document.getElementById("user").value
-    let password = document.getElementById("password").value
-    fetch("/createUser", {
-        method: "POST",
-        headers: {
-            'Content-Type': 'application/json'
-          },
-        body: JSON.stringify({
-            user:user,
-            password:password
-        })
-    }).then(response =>{
-        
-        // error display error
-        if(response.status !== 200){
-            document.getElementById("error_message").innerHTML = "An error occurred. Check for duplicate username or invalid password"
-        }else{
-            window.location = "/"
+      .then((response) => {
+        if (response.status === 200) {
+          window.location = "/";
+        } else if (response.status === 404) {
+          document.getElementById("error_message").innerHTML =
+            "User already exists. Please choose a different username";
+        } else {
+          document.getElementById("error_message").innerHTML =
+            "An error occurred. Check for duplicate username or invalid password";
         }
-    })
-}
+      });
+  };
 
-document.getElementById("login_btn").addEventListener("click", login)
-document.getElementById("create_btn").addEventListener("click", createUser)
+document.getElementById("create_btn").addEventListener("click", () => {
+    // validate the name & password
+    let user = document.getElementById("user").value;
+    let password = document.getElementById("password").value;
+    if (user.trim().length == 0 || password.trim().length == 0) {
+      document.getElementById("error_message").innerHTML = "Cannot submit empty field";
+    } else {
+      createUser(user, password);
+    }
+  });
 
