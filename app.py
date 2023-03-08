@@ -87,38 +87,77 @@ def recipe_components_page():
 
 
 # API endpoints
+
+# ///////////////////////
+#        CREATORS
+# SELECT
+# UPDATE
+# DELETE 
+# ///////////////////////
+
+@app.route("/creators", methods=["GET"])
+def getCreator():
+    '''
+    Gets data from table Creators thru db
+    '''
+    result = db_getCreator()
+
+    if result:
+        return "ok", 200
+
+    return "An error occurred", 404
+
+
+@app.route("/creators", methods=["PUT"])
+def updateCreators():
+    """
+    Updates Creator username
+    """
+    try:
+        post_data = request.get_json()
+        name = post_data['creator_name']
+        id = post_data['creator_id']
+        db_updateCreator(id, name)
+        return "ok", 200
+
+    except Exception:
+        return "error", 404
+    
+@app.route("/creators", methods=["DELETE"])
+def deleteCreator():
+    """
+    Deletes an ingredient
+    """
+    try:
+        db_deleteCreator(request.args.get("id", None))
+    except Exception:
+        pass
+
+    return "ok", 200
+    
+# ///////////////////////
+#        LOGIN 
+#    INSERT for both 
+# Creators and Passwords
+#      !! WORKS !!
+# ///////////////////////
+
 @app.route("/login", methods=["POST"])
-def login():
-
-    post_data = request.get_json()
-    user = post_data['user']
-    
-    # TODO check DB for username and password combination
-    user_valid = True
-    user_id = 0
-
-    # user is valid, set the session details 
-    if user_valid:
-        session['user'] = user
-        session['user_id'] = user_id
-
-    # give redirect for home
-    return redirect(url_for("home"))
-
-@app.route("/createUser", methods=["POST"])
 def createUser():
-    
+    '''
+    INSERT for both Creators and Passwords
+    Takes input from user at /login page and checks database if username exists.
+    If username exists, return error. Else, creates new username & pw.
+    Takes no blank fields.
+    '''
     # extract credentials
     post_data = request.get_json()
     user = post_data['user']
     password = post_data['password']
 
-    # TODO check if user exists yet
-    user_exists = False
-
     # user exists, do not create new user
-    if user_exists:
-        return 403
+    if user_exists(user):
+        return "User already exists", 404
 
     # create user and password in DB
     user, user_id = db_createUser(user, password)
@@ -130,14 +169,53 @@ def createUser():
     else:
         return "error", 400
 
+# ///////////////////////
+#        PASSWORDS
+# SELECT
+# UPDATE
+# DELETE !! WORKS !!
+# ///////////////////////
+@app.route("/passwords", methods=["GET"])
+def get_userPassword():
+    '''
+    Gets data from table Passwords
+    '''
+    result = db_getPassword()
+    print(result)
+    return jsonify(result)
 
-@app.route("/logout")
-def logout():
-    # clear session and return home
-    session.clear()
-    return redirect(url_for('home'))
+@app.route("/passwords", methods=["PUT"])
+def updatePassword():
+    """
+    Updates the password of creator in table Passwords
+    """
+    try:
+        post_data = request.get_json()
+        password = post_data['password']
+        id = post_data['creator_id']
+        db_updatePassword(id, password)
+        return "ok", 200
+
+    except Exception:
+        return "error", 404
+
+@app.route("/passwords", methods=["DELETE"])
+def deletePassword():
+    """
+    Deletes a Password 
+    """
+    try:
+        db_deletePassword(request.args.get("id", None))
+    except Exception:
+        pass
+
+    return "ok", 200
 
 
+
+# ///////////////////////
+#      INGREDIENTS
+# ///////////////////////
 @app.route("/ingredient", methods=["GET"])
 def getIngredients():
     """
@@ -189,6 +267,12 @@ def updateIngredient():
     except Exception:
         return "error", 404
 
+# ///////////////////////
+#        RECIPES
+# INSERT
+# UPDATE
+# DELETE 
+# ///////////////////////
 
 @app.route("/recipe", methods=["POST"])
 def createRecipe():
@@ -265,7 +349,7 @@ def db_getIngredient(filter=None):
     """.format(filter_query)
     cursor = mysql.connection.cursor()
     cursor.execute(query)
-    return  cursor.fetchall()
+    return cursor.fetchall()
 
 def db_updateIngredient(filter):
     query = "UPDATE Ingredients SET name = '{}' WHERE ingredientId = {}".format(filter["name"], filter["id"])
@@ -282,6 +366,22 @@ def db_deleteIngredient(id):
 #####################################################################
 # User & Password
 #####################################################################
+def db_getCreator():
+    query = "SELECT * FROM Creators"
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    return  cursor.fetchall()
+
+def db_getPassword():
+    query = """SELECT Creators.creatorID AS creator_id, Creators.username AS creator_name, Passwords.password AS password 
+    FROM Creators 
+    INNER JOIN Passwords ON Creators.creatorID = Passwords.creatorID 
+    ORDER BY username ASC;
+    """
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
+
 def db_createUser(name, password):
     """
     Create new user and password
@@ -308,15 +408,24 @@ def db_createUser(name, password):
     except Exception as e:
         print(e)
         return None, None
-
-def db_updateUser(id, name):
+    
+def user_exists(username):
     """
-    Update user to update the username
+    Checks if input matches any username on database
     """
-    query = "UPDATE Creators SET name = '{}' WHERE creatorID = {}".format(name, id)
+    # Connect to the database
     cursor = mysql.connection.cursor()
-    cursor.execute(query)
-    mysql.connection.commit()
+
+    # Query the database for the user
+    query = ("SELECT * FROM Creators WHERE username = %s")
+    cursor.execute(query, (username,))
+
+    # Check if the user exists
+    result = cursor.fetchone()
+    if result:
+        return True
+    else:
+        return False
 
 def db_updatePassword(id, password):
     """
@@ -327,7 +436,22 @@ def db_updatePassword(id, password):
     cursor.execute(query)
     mysql.connection.commit()
 
-def db_deleteUser(id):
+def db_deletePassword(id):
+    query = "DELETE FROM Passwords WHERE creatorID = {}".format(id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+def db_updateCreator(id, name):
+    """
+    Update user to update the username
+    """
+    query = "UPDATE Creators SET username = '{}' WHERE creatorID = {}".format(name, id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    mysql.connection.commit()
+
+def db_deleteCreator(id):
     query = "DELETE FROM Creators WHERE creatorID = {}".format(id)
     cursor = mysql.connection.cursor()
     cursor.execute(query)
