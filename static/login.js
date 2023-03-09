@@ -14,7 +14,7 @@ let createUser = (user, password) => {
     })
       .then((response) => {
         if (response.status === 200) {
-          window.location = "/";
+          window.location = "/creators";
         } else if (response.status === 404) {
           document.getElementById("error_message").innerHTML =
             "User already exists. Please choose a different username";
