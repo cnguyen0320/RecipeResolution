@@ -19,7 +19,7 @@ let fill_table = (data) =>{
         // add a link to the row to update
         //////////////////////////////////////////////////////////////////
         let update_element = document.createElement("button")
-        update_element.className = "btn btn-warning"
+        update_element.className = "btn btn-sm btn-warning"
         update_element.innerHTML = "Update Password"
         update_element.addEventListener("click", ()=>{
 

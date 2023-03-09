@@ -32,7 +32,7 @@ let fill_table = (data) =>{
         // add a link to the end of the end of the row to delete
         //////////////////////////////////////////////////////////////////
         let delete_element = document.createElement("button")
-        delete_element.className = "btn btn-danger"
+        delete_element.className = "btn btn-sm btn-danger"
         delete_element.innerHTML = "Delete"
         delete_element.addEventListener("click", ()=>{
             fetch(`/recipe_component/${rc_id}`, {

@@ -34,7 +34,7 @@ let fill_table = (data) =>{
         // add a link to the end of the end of the row to update
         //////////////////////////////////////////////////////////////////
         let update_element = document.createElement("button")
-        update_element.className = "btn btn-warning"
+        update_element.className = "btn btn-sm btn-warning"
         update_element.innerHTML = "Update Name"
         update_element.addEventListener("click", ()=>{
 
@@ -71,7 +71,7 @@ let fill_table = (data) =>{
         // add a link to the end of the end of the row to delete
         //////////////////////////////////////////////////////////////////
         let delete_element = document.createElement("button")
-        delete_element.className = "btn btn-danger"
+        delete_element.className = "btn btn-sm btn-danger"
         delete_element.innerHTML = "Delete"
         delete_element.addEventListener("click", ()=>{
             fetch(`/ingredient?id=${ingredient_id}`, {
