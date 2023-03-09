@@ -189,7 +189,6 @@ let get_creator_data = () =>{
         .then(data => {
             fill_creator_menu(data)
         })
-        .catch(error =>{})
 
 }
 get_creator_data()

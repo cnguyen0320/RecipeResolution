@@ -103,7 +103,7 @@ def getCreator():
     result = db_getCreator()
 
     if result:
-        return "ok", 200
+        return jsonify(result)
 
     return "An error occurred", 404
 
