@@ -117,7 +117,7 @@ def config_app(_app, _mysql):
     # DB SIDE
     ################################################################################################
     def db_getCreator():
-        query = """SELECT Creators.creatorID AS id, Creators.username AS name, COUNT(DISTINCT Recipes.creatorID) AS recipe_count
+        query = """SELECT Creators.creatorID AS id, Creators.username AS name, COUNT(Recipes.creatorID) AS recipe_count
         FROM Creators
         LEFT JOIN Recipes on Recipes.creatorID = Creators.creatorID
         GROUP BY Creators.creatorID;"""
