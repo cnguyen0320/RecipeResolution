@@ -10,7 +10,7 @@ def config_app(_app, _mysql):
     mysql = _mysql
 
     @app.route("/creators", methods=["GET"])
-    def user_page():
+    def creator_page():
         return render_template("creators.html")
     
     @app.route("/login", methods=["GET"])
@@ -37,25 +37,23 @@ def config_app(_app, _mysql):
         return "An error occurred", 404
 
 
-    @app.route("/creators", methods=["PUT"])
+    @app.route("/creator", methods=["PUT"])
     def updateCreators():
         """
         Updates Creator username
         """
         try:
             post_data = request.get_json()
-            name = post_data['creator_name']
-            id = post_data['creator_id']
-            db_updateCreator(id, name)
+            db_updateCreator(post_data)
             return "ok", 200
 
         except Exception:
             return "error", 404
         
-    @app.route("/creators", methods=["DELETE"])
+    @app.route("/creator", methods=["DELETE"])
     def deleteCreator():
         """
-        Deletes an ingredient
+        Deletes a Creator
         """
         try:
             db_deleteCreator(request.args.get("id", None))
@@ -63,6 +61,7 @@ def config_app(_app, _mysql):
             pass
 
         return "ok", 200
+
     
     @app.route("/login", methods=["POST"])
     def createUser():
@@ -92,8 +91,8 @@ def config_app(_app, _mysql):
             return "error", 400
         
 
-    @app.route("/passwords", methods=["GET"])
-    def get_userPassword():
+    @app.route("/password", methods=["GET"])
+    def getPassword():
         '''
         Gets data from table Passwords
         '''
@@ -101,44 +100,35 @@ def config_app(_app, _mysql):
         print(result)
         return jsonify(result)
 
-    @app.route("/passwords", methods=["PUT"])
-    def updatePassword():
+    @app.route("/password", methods=["PUT"])
+    def updatePasswords():
         """
         Updates the password of creator in table Passwords
         """
         try:
             post_data = request.get_json()
-            password = post_data['password']
-            id = post_data['creator_id']
-            db_updatePassword(id, password)
+            db_updatePassword(post_data)
             return "ok", 200
 
         except Exception:
             return "error", 404
 
-    @app.route("/passwords", methods=["DELETE"])
-    def deletePassword():
-        """
-        Deletes a Password 
-        """
-        try:
-            db_deletePassword(request.args.get("id", None))
-        except Exception:
-            pass
-
-        return "ok", 200
-
     ################################################################################################
     # DB SIDE
     ################################################################################################
     def db_getCreator():
-        query = "SELECT * FROM Creators"
+        query = """SELECT Creators.creatorID AS id, Creators.username AS name, COUNT(DISTINCT Recipes.creatorID) AS recipe_count
+        FROM Creators
+        LEFT JOIN Recipes on Recipes.creatorID = Creators.creatorID
+        GROUP BY Creators.creatorID;"""
+
         cursor = mysql.connection.cursor()
         cursor.execute(query)
-        return  cursor.fetchall()
+
+        return cursor.fetchall()
 
     def db_getPassword():
-        query = """SELECT Creators.creatorID AS creator_id, Creators.username AS creator_name, Passwords.password AS password 
+        query = """SELECT Creators.creatorID AS id, Creators.username AS creator_name, Passwords.password AS password 
         FROM Creators 
         INNER JOIN Passwords ON Creators.creatorID = Passwords.creatorID 
         ORDER BY username ASC;
@@ -192,31 +182,28 @@ def config_app(_app, _mysql):
         else:
             return False
 
-    def db_updatePassword(id, password):
+    def db_updatePassword(post):
         """
         Update password on user id
         """
-        query = "UPDATE Passwords SET password = '{}' WHERE creatorID = {}".format(password, id)
+        query = "UPDATE Passwords SET password = '{}' WHERE creatorID = {}".format(post["password"], post["id"])
         cursor = mysql.connection.cursor()
         cursor.execute(query)
         mysql.connection.commit()
 
-    def db_deletePassword(id):
-        query = "DELETE FROM Passwords WHERE creatorID = {}".format(id)
-        cursor = mysql.connection.cursor()
-        cursor.execute(query)
-        mysql.connection.commit()
-
-    def db_updateCreator(id, name):
+    def db_updateCreator(post):
         """
         Update user to update the username
         """
-        query = "UPDATE Creators SET username = '{}' WHERE creatorID = {}".format(name, id)
+        query = "UPDATE Creators SET username = '{}' WHERE creatorID = {}".format(post["name"], post["id"])
         cursor = mysql.connection.cursor()
         cursor.execute(query)
         mysql.connection.commit()
 
     def db_deleteCreator(id):
+        """
+        Deletes Creator
+        """
         query = "DELETE FROM Creators WHERE creatorID = {}".format(id)
         cursor = mysql.connection.cursor()
         cursor.execute(query)
