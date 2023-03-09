@@ -59,7 +59,7 @@ def config_app(_app, _mysql):
         FROM RecipeComponents rc
         LEFT JOIN Recipes ON Recipes.recipeID = rc.recipeID
         LEFT JOIN Ingredients ON Ingredients.ingredientID = rc.ingredientID
-        ORDER BY recipe_name
+        ORDER BY id
         ;"""
 
         cursor = mysql.connection.cursor()
