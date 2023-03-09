@@ -13,7 +13,7 @@ let fill_table = (data) =>{
             row.name, 
             row.ingredient_count, 
             row.creator, 
-            row.date
+            row.date.substring(5,16)
         ])
 
         // add a link to the end of the end of the row to go to the recipe
@@ -33,48 +33,9 @@ let fill_table = (data) =>{
 }
 
 
-if (SIMULATE_DATA){
-    let simulated_data = [
-        {
-            "id": 0,
-            "name": "Ice cream sundae",
-            "creator": "John Snow",
-            "ingredient_count": 3,
-            "date": "2020-11-08"
-        },
-        {
-            "id": 1,
-            "name": "Chicken Fried Rice",
-            "creator": "Joyce Bawk",
-            "ingredient_count": 6,
-            "date": "2015-06-09"
-        },
-        {
-            "id": 2,
-            "name": "Grilled Steak",
-            "creator": "Terry Moo",
-            "ingredient_count": 3,
-            "date": "2021-12-07"
-        },
-        {
-            "id": 3,
-            "name": "Green bean casserole",
-            "creator": "Apple Beanstalk",
-            "ingredient_count": 5,
-            "date": "2017-07-07"
-        },
-        {
-            "id": 4,
-            "name": "Croissant",
-            "creator": "Pierre Francais",
-            "ingredient_count": 3,
-            "date": "2009-03-29"
-        },
-    ]
-    fill_table(simulated_data)
-}else{
+
     let query_recipes = () =>{
-        fetch("/recipes", {
+        fetch("/recipe", {
             method: "GET"
         })
         .then(response => response.json())
@@ -84,8 +45,8 @@ if (SIMULATE_DATA){
     }
     
     // first thing to do is to query for recipe data
-    
-}
+    query_recipes()
+
 
 // add event listener to Create Button
 document.getElementById("create_recipe_btn").addEventListener("click", ()=>{
@@ -148,38 +109,8 @@ let fill_menu = (data) =>{
  * Requests ingredient list from server
  */
 let get_ingredient_data = () =>{
-    if (SIMULATE_DATA){
-        let simulated_data = [
-            {
-                "id": 0,
-                "name": "Vanilla ice cream",
-                "recipe_count": 2,
-            },
-            {
-                "id": 1,
-                "name": "Chicken",
-                "recipe_count": 3,
-            },
-            {
-                "id": 2,
-                "name": "Sriloin Steak",
-                "recipe_count": 1,
-            },
-            {
-                "id": 3,
-                "name": "Green beans",
-                "recipe_count": 1,
-            },
-            {
-                "id": 4,
-                "name": "Flour",
-                "recipe_count": 7,
-            },
-        ]
-        fill_menu(simulated_data)
-    }else{
         
-        fetch("/ingredients", {
+        fetch("/ingredient", {
             method: "GET"
         })
         .then(response => response.json())
@@ -187,7 +118,6 @@ let get_ingredient_data = () =>{
         
         // perform query and then fill table
         
-    }
 }
 get_ingredient_data()
 
@@ -251,48 +181,16 @@ let fill_creator_menu = (data) =>{
  * Requests ingredient list from server
  */
 let get_creator_data = () =>{
-    if (SIMULATE_DATA){
-        let simulated_data = [
-            {
-                "id": 0,
-                "name": "John Snow",
-                "recipe_count": 1
-            },
-            {
-                "id": 1,
-                "name": "Joyce Bawk",
-                "recipe_count": 6,
-            },
-            {
-                "id": 2,
-                "name": "Terry Moo",
-                "recipe_count": 3,
-            },
-            {
-                "id": 3,
-                "name": "Apple Beanstalk",
-                "recipe_count": 2,
-            },
-            {
-                "id": 4,
-                "name": "Pierre Francais",
-                "recipe_count": 3,
-            },
-        ]
-        fill_creator_menu(simulated_data)
-    }else{
         
-        fetch("/users", {
+        fetch("/creator", {
             method: "GET"
         })
         .then(response =>response.json())
         .then(data => {
-            fill_table(data)
+            fill_creator_menu(data)
         })
-        
-        // perform query and then fill table
-        
-    }
+        .catch(error =>{})
+
 }
 get_creator_data()
 

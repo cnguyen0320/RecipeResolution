@@ -274,6 +274,17 @@ def updateIngredient():
 # DELETE 
 # ///////////////////////
 
+@app.route("/recipe", methods=["GET"])
+def getRecipes():
+    # generate filter based on query string
+    filter = dict()
+
+    filter["creatorID"] = request.args.get("user", None)
+    filter["ingredient"] = request.args.get("ingredient", None)
+
+    return jsonify(db_getAllRecipe(filter))
+    
+
 @app.route("/recipe", methods=["POST"])
 def createRecipe():
     # perform abort if POST request was made without being logged in
@@ -475,11 +486,11 @@ def db_getRecipe(id):
     """
     # get recipe data
     recipe_query = """
-    SELECT Recipes.recipeID AS id, Recipe.description AS description, 
+    SELECT Recipes.recipeID AS id, Recipes.description AS description, 
     Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator
     FROM Recipes
     LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
-    LEFT JOIN RecipeComponents ON Recipe.recipeID = RecipeComponents.recipeID
+    LEFT JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID
     WHERE Recipes.recipeID = {}
     ;""".format(id)
     cursor = mysql.connection.cursor()
@@ -489,7 +500,7 @@ def db_getRecipe(id):
     # get ingredient data
     ingredient_query = """
     SELECT Ingredients.ingredientID AS id, Ingredients.name as name,
-    RecipeComponents.quantity as quantity, RecipeComponents.unit as unit, RecipeComponent.required as required
+    RecipeComponents.quantity as quantity, RecipeComponents.unit as unit, RecipeComponents.required as required
     FROM Ingredients
     RIGHT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID
     WHERE RecipeComponents.recipeID = {}
@@ -508,32 +519,35 @@ def db_getAllRecipe(filter):
     """
     Get all recipes by applying filter
     """
-    # TODO
     
     creator_string = ""
-    if "creator" in filter and filter["creatorID"] is not None:
-        creator_string = "Recipe.creatorID = {}".format(filter["creator"])
+    if "creatorID" in filter and filter["creatorID"] is not None:
+        creator_string = "Recipe.creatorID = {}".format(filter["creatorID"])
 
     ingredient_string = ""
     if "ingredient" in filter and filter["ingredient"] is not None:
-        ingredient_string = "ingredientID "
-    
+        ingredient_string = "Ingredients.ingredientID = {}".format(filter["ingredient"])
 
+    filter_string = ""
+    if creator_string !="" or ingredient_string != "":
+        filter_string = "WHERE " + "AND ".join([creator_string, ingredient_string])
+
+    print(filter)
     
     query = """
     SELECT Recipes.recipeID AS id, Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator, 
     COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count
     FROM Recipes
     LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
-    LEFT JOIN RecipeComponents ON Recipe.recipeID = RecipeComponents.recipeID
+    LEFT JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID
     {}
     GROUP BY Recipes.recipeID
-    {}
-    ;""".format(creator_string, ingredient_string)
+    ;""".format(filter_string)
+    print(query)
 
     cursor = mysql.connection.cursor()
     cursor.execute(query)
-    
+
     return cursor.fetchall()
 
 def db_deleteRecipe(id):
@@ -573,4 +587,4 @@ def db_deleteRecipeComponent(id):
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=3457)
+    app.run(host="0.0.0.0", port=3459)
