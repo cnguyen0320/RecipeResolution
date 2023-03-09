@@ -1,13 +1,22 @@
+import os
+import dotenv
 from flask import Flask, render_template, redirect, session, url_for, request, abort, jsonify
 from flask_mysqldb import MySQL
 import app_creators_password, app_recipe, app_ingredients, app_components
 
+
+
 app = Flask(__name__)
 app.secret_key = "RecipeResolution"
 
+dotenv.load_dotenv(dotenv.find_dotenv())
+
+USERNAME = os.getenv("USERNAME")
+PASSWORD = os.getenv("PASSWORD")
+
 app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
 app.config['MYSQL_USER'] = 'cs340_nguyech6'
-app.config['MYSQL_PASSWORD'] = '5055' #last 4 of onid
+app.config['MYSQL_PASSWORD'] = PASSWORD
 app.config['MYSQL_DB'] = 'cs340_nguyech6'
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
 
