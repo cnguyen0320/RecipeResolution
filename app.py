@@ -95,7 +95,7 @@ def recipe_components_page():
 # DELETE 
 # ///////////////////////
 
-@app.route("/creators", methods=["GET"])
+@app.route("/creator", methods=["GET"])
 def getCreator():
     '''
     Gets data from table Creators thru db
