@@ -180,7 +180,19 @@ document.getElementById("add_component").addEventListener("click", ()=>{
         headers: {
             'Content-Type': 'application/json'
         }
-    }).then(
-        location.reload()
-    )
+    }).then(response =>{
+        if(response.status == 200){
+
+            // refresh the page on success
+            location.reload()
+        }else{
+
+            // attempt to get error message from response
+            // else use default
+            let err_msg = "An error occurred"
+
+            // show error
+            document.getElementById("error_message").innerHTML = err_msg
+        }
+    })
 })
