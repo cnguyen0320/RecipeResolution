@@ -125,7 +125,7 @@ let get_data = (filter) =>{
 }
 
 /**
- * Performs
+ * Performs create ingredient
  */
 let create_ingredient = (name) =>{
     let body = {

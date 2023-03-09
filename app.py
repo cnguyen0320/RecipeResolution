@@ -473,15 +473,68 @@ def db_getRecipe(id):
     """
     Get a singular recipe based on ID
     """
-    # TODO
-    pass
+    # get recipe data
+    recipe_query = """
+    SELECT Recipes.recipeID AS id, Recipe.description AS description, 
+    Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator
+    FROM Recipes
+    LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
+    LEFT JOIN RecipeComponents ON Recipe.recipeID = RecipeComponents.recipeID
+    WHERE Recipes.recipeID = {}
+    ;""".format(id)
+    cursor = mysql.connection.cursor()
+    cursor.execute(recipe_query)
+    recipe_result = cursor.fetchall()[0]
+
+    # get ingredient data
+    ingredient_query = """
+    SELECT Ingredients.ingredientID AS id, Ingredients.name as name,
+    RecipeComponents.quantity as quantity, RecipeComponents.unit as unit, RecipeComponent.required as required
+    FROM Ingredients
+    RIGHT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID
+    WHERE RecipeComponents.recipeID = {}
+    """.format(id)
+    cursor.execute(ingredient_query)
+    ingredient_result = cursor.fetchall()
+
+    # combine the dictionaries
+    recipe_result["ingredients"] = ingredient_result
+
+    return recipe_result
+
+
 
 def db_getAllRecipe(filter):
     """
     Get all recipes by applying filter
     """
     # TODO
-    pass
+    
+    creator_string = ""
+    if "creator" in filter and filter["creatorID"] is not None:
+        creator_string = "Recipe.creatorID = {}".format(filter["creator"])
+
+    ingredient_string = ""
+    if "ingredient" in filter and filter["ingredient"] is not None:
+        ingredient_string = "ingredientID "
+    
+
+    
+    query = """
+    SELECT Recipes.recipeID AS id, Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator, 
+    COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count
+    FROM Recipes
+    LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
+    LEFT JOIN RecipeComponents ON Recipe.recipeID = RecipeComponents.recipeID
+    {}
+    GROUP BY Recipes.recipeID
+    {}
+    ;""".format(creator_string, ingredient_string)
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    
+    return cursor.fetchall()
 
 def db_deleteRecipe(id):
     query = "DELETE FROM Recipes WHERE recipeID = {}".format(id)
@@ -496,9 +549,17 @@ def db_createRecipeComponent():
     # TODO
     pass
 
-def db_getRecipeComponent():
-    # TODO
-    pass
+def db_getRecipeComponents():
+    query = """
+    SELECT rc.componentID as id, rc.recipeID as recipe_id, rc.ingredientID as ingredient_id,
+    rc.quantity as quantity, rc.unit as unit, rc.required as required
+    FROM RecipeComponents rc;
+    """
+
+    cursor = mysql.connection.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
+
 
 def db_updateRecipeComponent():
     # TODO
