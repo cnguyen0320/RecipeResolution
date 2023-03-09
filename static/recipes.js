@@ -12,7 +12,8 @@ let fill_table = (data) =>{
             row.id,
             row.name, 
             row.ingredient_count, 
-            row.creator, 
+            row.creator !== null ? row.creator : "<i>NULL</i>", 
+            row.private ? "Private" : "Public", 
             row.date.substring(5,16)
         ])
 
@@ -35,7 +36,8 @@ let fill_table = (data) =>{
 
 
     let query_recipes = () =>{
-        fetch("/recipe", {
+
+        fetch(`/recipe${window.location.search}`, {
             method: "GET"
         })
         .then(response => response.json())
@@ -161,8 +163,8 @@ let fill_creator_menu = (data) =>{
 
     for(row of data){
         option = document.createElement("option")
-        option.value= row.id,
-        option.innerHTML = row.name
+        option.value= row.creatorID,
+        option.innerHTML = row.username
         
         // build arrays for option elements and values
         options.appendChild(option)

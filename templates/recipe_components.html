@@ -58,18 +58,45 @@
                     <thead>
                         <tr>
                             <th scope="col">ID</th>
-                            <th scope="col">Recipe ID</th>
-                            <th scope="col">Ingredient ID</th>
-                            <th scope="col">Quantity</th>
+                            <th scope="col">Recipe</th>
+                            <th scope="col">Ingredient</th>
+                            <th scope="col">Qty</th>
                             <th scope="col">Unit</th>
-                            <th scope="col">Optional?</th>
+                            <th scope="col">Required/Optional</th>
                             <th scope="col">View in Recipe</th>
+                            <th scope="col">Delete</th>
                         </tr>
                     </thead>
                     <tbody id="table_body">
 
                     </tbody>
                 </table>
+                <div>
+                    <h3>Add New</h3>
+                    <div class="input-group my-2">
+                        <label class="input-group-text" for="">Recipe</label>
+                        <select class="form-select" id="recipe_select"></select>
+
+                        <label class="input-group-text" for="">Ingredient</label>
+                        <select class="form-select" id="ingredient_select"></select>
+                    </div>
+
+                    <div class="input-group my-2">
+                        <label class="input-group-text" for="">Qty</label>
+                        <input class="form-control" id="add_qty" type="number" placeholder="#">
+
+                        <label class="input-group-text" for="">Unit</label>
+                        <input class="form-control" id="add_unit" type="text" placeholder="unit">
+
+                        <select class="form-select" id="require_select">
+                            <option value="1">Required</option>
+                            <option value="0">Optional</option>
+                        </select>
+                        
+                    </div>
+
+                    <button class="btn btn-outline-success" type="button" id="add_component">Create</button>
+                </div>
             </div>
         </content>
         

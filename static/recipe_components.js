@@ -8,13 +8,14 @@ let fill_table = (data) =>{
     
 
     for(row of data){
+        let rc_id = row.id
         let row_element = form_row([
-            row.id,
-            row.recipe_id, 
-            row.ingredient_id, 
+            rc_id,
+            row.recipe_name, 
+            row.ingredient_name, 
             row.quantity, 
             row.unit,
-            row.required ? "No": "Yes"
+            row.required ? "Required": "Optional"
         ])
         
 
@@ -27,80 +28,157 @@ let fill_table = (data) =>{
         link_column.appendChild(link_element)
         row_element.appendChild(link_column)
 
+        //////////////////////////////////////////////////////////////////
+        // add a link to the end of the end of the row to delete
+        //////////////////////////////////////////////////////////////////
+        let delete_element = document.createElement("button")
+        delete_element.className = "btn btn-danger"
+        delete_element.innerHTML = "Delete"
+        delete_element.addEventListener("click", ()=>{
+            fetch(`/recipe_component/${rc_id}`, {
+                method: "DELETE"
+            })
+            .then(response=>{
+                // reload on success
+                if (response.status >= 200 && response.status <300){
+                    location.reload()
+                }else{
+                    alert("An error occurred")
+                }
+            })
+        })
+
+        let delete_column = document.createElement("td")
+        delete_column.appendChild(delete_element)
+        row_element.appendChild(delete_column)
+
+
         // add the row to the table
         let table_body = document.getElementById('table_body')
         table_body.appendChild(row_element)
-
     }
 }
 
 
-if (SIMULATE_DATA){
-    let simulated_data = [
-        {
-            "id": 0,
-            "recipe_id": 5,
-            "ingredient_id": 1,
-            "quantity": 3,
-            "unit": "pinches",
-            "required": true
-        },
-        {
-            "id": 1,
-            "recipe_id": 3,
-            "ingredient_id": 2,
-            "quantity": 2,
-            "unit": "oz",
-            "required": false
-        },{
-            "id": 2,
-            "recipe_id": 4,
-            "ingredient_id": 1,
-            "quantity": 1,
-            "unit": "",
-            "required": true
-        },{
-            "id": 3,
-            "recipe_id": 2,
-            "ingredient_id": 2,
-            "quantity": 7,
-            "unit": "teaspoons",
-            "required": false
-        },{
-            "id": 4,
-            "recipe_id": 1,
-            "ingredient_id": 1,
-            "quantity": 2,
-            "unit": "cups",
-            "required": false
-        },
-    ]
-    fill_table(simulated_data)
-}else{
-    let query_recipes = () =>{
-        fetch("/recipes", {
-            method: "GET"
-        })
-        .then(response => response.json())
-        .then(data =>{
-            fill_table(data)
-        })
-    }
+
+let query_components = () =>{
+    fetch("/recipe_component", {
+        method: "GET"
+    })
+    .then(response => response.json())
+    .then(data =>{
+        fill_table(data)
+    })
+}
+
+// first thing to do is to query for recipe data
+query_components()
+
+/**
+ * Fills the select menu on the page with the
+ * received data
+ * @param {*} data Array of Ingredient data
+ */
+let fill_ingredients = (data) =>{
     
-    // first thing to do is to query for recipe data
+    // create options dropdown list
+    let options = document.getElementById("ingredient_select")
+    let values = []
+
+    // first create the empty option
+    let option = document.createElement("option")
+    option.value = ""
+    option.innerHTML = "Select an Ingredient..."
+    options.appendChild(option)
+    values.push(option.value)
+
+    for(row of data){
+        option = document.createElement("option")
+        option.value= row.id,
+        option.innerHTML = row.name
+        
+        // build arrays for option elements and values
+        options.appendChild(option)
+        values.push(option.value)
+    }
     
 }
 
-// add event listener to Create Button
-document.getElementById("create_recipe_btn").addEventListener("click", ()=>{
+/**
+ * Fills the select menu on the page with the
+ * received data
+ * @param {*} data Array of Ingredient data
+ */
+let fill_recipes = (data) =>{
+    
+    // create options dropdown list
+    let options = document.getElementById("recipe_select")
+    let values = []
 
-    // if user does not exist, go to login page
-    if(false){
-        // TODO implement user
-        window.location.pathname = "/login"
-    }else{
-        window.location.pathname = "/recipe/create"
+    // first create the empty option
+    let option = document.createElement("option")
+    option.value = ""
+    option.innerHTML = "Select a Recipe..."
+    options.appendChild(option)
+    values.push(option.value)
+
+    for(row of data){
+        option = document.createElement("option")
+        option.value= row.id,
+        option.innerHTML = row.name
+        
+        // build arrays for option elements and values
+        options.appendChild(option)
+        values.push(option.value)
+    }
+    
+}
+
+/**
+ * Requests ingredient list from server
+ */
+let get_data = () =>{
+    fetch("/ingredient", {
+        method: "GET"
+    })
+    .then(response => response.json())
+    .then(data => fill_ingredients(data))
+    
+
+    fetch("/recipe")
+    .then(response=>response.json())
+    .then(data => fill_recipes(data))
+
+}
+
+get_data()
+
+// POST to create
+document.getElementById("add_component").addEventListener("click", ()=>{
+    let recipeId = parseInt(document.getElementById("recipe_select").value)
+    let ingredientID = parseInt(document.getElementById("ingredient_select").value)
+    let quantity = parseFloat(document.getElementById("add_qty").value)
+    let unit = document.getElementById("add_unit".value)
+    let require = parseInt(document.getElementById("require_select").value)
+
+    // validate
+    if(Number.isNaN(recipeId) || Number.isNaN(ingredientID || Number.isNaN(quantity))){
+        alert("You must select a recipe and an ingredient and specify a quantity")
+        return
     }
 
+    let body = {
+        recipeID: recipeId,
+        ingredientID: ingredientID,
+        quantity: quantity,
+        unit: unit,
+        required: require
+    }
+    fetch("/recipe_component", {
+        method: "POST",
+        body: JSON.stringify(body),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
 })
-

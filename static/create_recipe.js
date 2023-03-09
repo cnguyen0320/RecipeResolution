@@ -34,7 +34,6 @@ let fill_menu = (data) =>{
 
     let select_elements = document.getElementsByClassName("ingredient_select")
     for(element of select_elements){
-        console.log(element)
         // capture the current value to not overwrite
         let old_value = element.value
         
@@ -56,47 +55,13 @@ let fill_menu = (data) =>{
  * Requests ingredient list from server
  */
 let get_data = () =>{
-    if (SIMULATE_DATA){
-        let simulated_data = [
-            {
-                "id": 0,
-                "name": "Vanilla ice cream",
-                "recipe_count": 2,
-            },
-            {
-                "id": 1,
-                "name": "Chicken",
-                "recipe_count": 3,
-            },
-            {
-                "id": 2,
-                "name": "Sriloin Steak",
-                "recipe_count": 1,
-            },
-            {
-                "id": 3,
-                "name": "Green beans",
-                "recipe_count": 1,
-            },
-            {
-                "id": 4,
-                "name": "Flour",
-                "recipe_count": 7,
-            },
-        ]
-        fill_menu(simulated_data)
-    }else{
-        
-        fetch("/ingredients", {
+        fetch("/ingredient", {
             method: "GET"
         })
         .then(response => response.json())
         .then(data => fill_menu(data))
         
-        // perform query and then fill table
-        
     }
-}
 
 let add_ingredient_row = ()=>{
     let template_node = document.getElementById("hidden_ingredient_template")
@@ -137,22 +102,51 @@ if(document.location.pathname.match("edit") != null){
 document.getElementById("submit_btn").addEventListener("click", ()=>{
     let name = document.getElementById("name").value
     let description = document.getElementById("description").value
+    let creatorID = parseInt(document.getElementById("creator_select").value)
+    let private = parseInt(document.getElementById("private_select").value)
 
     let ingredients = Array()
 
     // loop over all ingredients on the page
     let ingredient_options = document.getElementsByClassName("ingredient_select")
+    let ingredient_set = new Set()
     for(ingredient of ingredient_options){
+        if (ingredient.value == "") {
+            continue
+        }
+
         // go up two levels to get the parent
         let row = ingredient.parentNode.parentNode
 
         // create the object for array
         let ingredient_item = Object()
         ingredient_item.id = ingredient.value
-        ingredient_item.quantity = row.getElementsByClassName("ingredient_quantity")[0]
-        ingredient_item.unit = row.getElementsByClassName("ingredient_quantity")[0]
+        try{
+            ingredient_item.quantity = parseFloat(row.getElementsByClassName("ingredient_quantity")[0].value)
+        }catch{
+            ingredient_item.quantity = 0.0
+        }
+        ingredient_item.unit = row.getElementsByClassName("ingredient_unit")[0].value
+        ingredient_item.required = parseInt(row.getElementsByClassName("required_select")[0].value)
 
         ingredients.push(ingredient_item)
+
+        // prevent multiple rows of the same ingredient
+        if (ingredient_set.has(ingredient_item.id)){
+            alert("You must combine all rows of the same ingredient")
+            return
+        }else{
+            ingredient_set.add(ingredient_item.id)
+        }
+    }
+
+    let body = {
+        id: !Number.isNaN(recipe_id) ? recipe_id: null,
+        name: name,
+        description: description,
+        creatorID : !Number.isNaN(creatorID) ? creatorID : "",
+        ingredients: ingredients,
+        private: private
     }
 
     let url = "/recipe"
@@ -160,13 +154,10 @@ document.getElementById("submit_btn").addEventListener("click", ()=>{
         headers: {
             'Content-Type': 'application/json'
             },
-        body: JSON.stringify({
-            name: name,
-            description: description,
-            ingredients: ingredients
-        })
+        body: JSON.stringify(body)
     }
 
+    
     // modify the method and URL depending on whether we are editing
     if (_page_create){
         options.method = "POST"
@@ -176,5 +167,76 @@ document.getElementById("submit_btn").addEventListener("click", ()=>{
     }
 
     fetch(url, options)
+    .then(response =>{
+        if(response.status == 200){
+
+            // go back to recipes on success
+            window.location.assign("/recipes")
+        }else{
+
+            // attempt to get error message from response
+            // else use default
+            let err_msg = "An error occurred"
+
+            // show error
+            alert(err_msg)
+        }
+    })
     
 })
+
+/**
+ * 
+ * Fills the select menu on the page with the
+ * received data
+ * @param {*} data Array of Ingredient data
+ */
+let fill_creator_menu = (data) =>{
+    
+    // create options dropdown list
+    let options = document.createElement("div")
+    let values = []
+
+    // first create the empty option
+    let option = document.createElement("option")
+    option.value = ""
+    option.innerHTML = "Select a Creator..."
+    options.appendChild(option)
+    values.push(option.value)
+
+    for(row of data){
+        option = document.createElement("option")
+        option.value= row.creatorID,
+        option.innerHTML = row.username
+        
+        // build arrays for option elements and values
+        options.appendChild(option)
+        values.push(option.value)
+    }
+
+    // update the dropdown
+    let element = document.getElementById("creator_select")
+    let element_value = element.value
+    console.log(element_value)
+    
+    // copy the inner html of the template and inject into this one
+    element.innerHTML = options.innerHTML
+    element.value = element_value
+        
+}
+
+/**
+ * Requests ingredient list from server
+ */
+let get_creator_data = () =>{
+        
+        fetch("/creator", {
+            method: "GET"
+        })
+        .then(response =>response.json())
+        .then(data => {
+            fill_creator_menu(data)
+        })
+
+}
+get_creator_data()

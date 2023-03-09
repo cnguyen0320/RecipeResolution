@@ -65,18 +65,34 @@
 
                 <div>
 
-                <form class="form-floating my-2">
-                    <textarea class="form-control" id="description" placeholder="" style="min-height:35vh">{% if recipe %}{{recipe.description}} {% endif%}</textarea>
-                    <label for="description" >Description</label>
-                </form>
+                    <div class="input-group my-2">
+                        <label class="input-group-text" for="">Creator</label>
+                        <select class="form-select" id="creator_select" {% if recipe %} value="{{recipe.creatorID}}" {% endif%}>
+                            {% if recipe %}
+                            <option value="{{recipe.creatorID}}">{{recipe.creator}}</option>
+                            {% endif%}
+                        </select>
+                        
+                        <label class="input-group-text" for="">Public/Private</label>
+                        <select class="form-select" id="private_select" {% if recipe %} value="{{recipe.required}}" {% endif%}>
+                            <option value=0>Public</option>
+                            <option value=1>Private</option>
+                        </select>
+                    </div>
+
+                    <form class="form-floating my-2">
+                        <textarea class="form-control" id="description" placeholder="" style="min-height:35vh">{% if recipe %}{{recipe.description}} {% endif%}</textarea>
+                        <label for="description" >Description</label>
+                    </form>
 
                 </div>
         
                 <table id="ingredients_table" class="table table-striped">
                     <thead>
-                        <th class="w-50" scope="col">Ingredient</th>
+                        <th class="w-40" scope="col">Ingredient</th>
                         <th scope="col">Quantity</th>
                         <th scope="col">Units</th>
+                        <th scope="col">Required</th>
                     </thead>
 
                     <tbody id="table_body">
@@ -85,12 +101,17 @@
                                 <select class="form-select ingredient_select" placeholder="Select Ingredient"></select>
                             </td>
                             <td>
-                                <input class="form-control" type="number" min="0" placeholder="#">
+                                <input class="form-control ingredient_quantity" type="number" min="0" placeholder="#">
                             </td>
                             <td>
-                                <input class="form-control" type="text" placeholder="units">
+                                <input class="form-control ingredient_unit" type="text" placeholder="units">
                             </td>
-                            
+                            <td>
+                                    <select class="form-select required_select" value=1>
+                                        <option value=1>Yes</option>
+                                        <option value=0>No</option>
+                                    </select>
+                            </td>
                         </tr>
 
                         {% if recipe %}
@@ -104,7 +125,13 @@
                                 <input class="form-control ingredient_quantity" type="number" min="0" placeholder="#" value="{{ingredient.quantity}}">
                             </td>
                             <td>
-                                <input class="form-control ingredient_unit" type="text" placeholder="units" value="{{ingredient.units}}">
+                                <input class="form-control ingredient_unit" type="text" placeholder="units" value="{{ingredient.unit}}">
+                            </td>
+                            <td>
+                                    <select class="form-select  required_select" value="{{ingredient.required}}">
+                                        <option value=1>Yes</option>
+                                        <option value=0>No</option>
+                                    </select>
                             </td>
                         </tr>
 

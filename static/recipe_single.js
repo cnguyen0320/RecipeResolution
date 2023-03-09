@@ -11,9 +11,11 @@ let fill_content = (data) =>{
     
     // fill in the easy fields
     document.getElementById("name").innerHTML = data.name
-    document.getElementById("date").innerHTML = data.date
-    document.getElementById("creator").innerHTML = data.creator
+    document.getElementById("date").innerHTML = data.date.substring(5,16)
+    document.getElementById("creator").innerHTML = data.creator ? data.creator : "<i>NULL</i>"
     document.getElementById("description").innerHTML = data.description.replaceAll("\n", "<br>") // replace all new lines with line break
+    document.getElementById("private_public").innerHTML = data.private ? "Private" : "Public"
+
 
 
     // fill in ingredients
@@ -21,7 +23,8 @@ let fill_content = (data) =>{
         console.log(row)
         let row_element = form_row([
             row.name, 
-            `${row.quantity} ${row.unit}`, // concatenate quantity and unit for concise view
+            `${parseFloat(row.quantity).toFixed(4)} ${row.unit}`, // concatenate quantity and unit for concise view
+            row.required ? "Required" : "Optional"
         ])
 
         // add a link to the end of the end of the row to go to the recipes w/ ingredient
@@ -42,26 +45,8 @@ let fill_content = (data) =>{
 
 
 if (SIMULATE_DATA){
-    let simulated_data = {
-        "id": recipe_id,
-        "name": "Ice cream sundae",
-        "description": "An ice cream sundae is the best type of dessert.\nYou can fill it with whatever you want, but here are my favorites!",
-        "creator": "John Snow",
-        "creator_id": 0,
-        "date": "2020-11-08",
-        "ingredients": [
-            {id:78, name: "Vanilla Ice Cream", quantity:1, unit:"scoop", required: true},
-            {id:74, name: "Chocalate Fudge", quantity:1, unit:"oz", required: false},
-            {id:5 ,name: "Graham Crackers", quantity:1, unit:"", required: false},
-            {id: 2, name: "Cherry", quantity:1, unit:"", required: false},
-        ],
-        
-    }
-    
-    fill_content(simulated_data)
-}else{
     let query_recipes = () =>{
-        fetch("/recipes", {
+        fetch(`/recipe/detailed/${recipe_id}`, {
             method: "GET"
         })
         .then(response =>response.json())
@@ -73,7 +58,7 @@ if (SIMULATE_DATA){
     }
     
     // first thing to do is to query for recipe data
-    
+    query_recipes()
 }
 
 // set up delete button if it is rendered

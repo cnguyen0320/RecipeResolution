@@ -27,7 +27,6 @@ def config_app(_app, _mysql):
             "min": request.args.get("min", None),
             "max": request.args.get("max", None)
         })
-        print(result)
         return jsonify(result)
 
 

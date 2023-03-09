@@ -20,40 +20,15 @@ def config_app(_app, _mysql):
         if id == "create":
             return render_template("create_recipe.html")
         else:
-            creator_id = 0 # TODO get the creator ID who created the recipe
-            return render_template("recipe.html", recipe_id=id, creator_id=creator_id)
+            return render_template("recipe.html", recipe_id=id)
 
     @app.route("/edit/<id>", methods=["GET"])
     def recipe_edit(id):
-        creator_id = 0 # TODO get the creator ID who created the recipe
         
-        # if creator and current user matches, then return the edit page with all the recipe info prefilled
-        # TODO this is test data
-        recipe = {
-            'name': "test",
-            'description':"test description\nbooyah",
-            'date': "2019-01-01",
-            'creator': "John",
-            'ingredients':[
-                {
-                    'id': 0,
-                    'name': "test ingredient",
-                    'quantity': 5,
-                    'units': "unit"
-                },
-                {
-                    'id': 0,
-                    'name': "test ingredient2",
-                    'quantity': 2,
-                    'units': "units"
-                }
-            ]
-        }
-        if True: # TODO uncomment -> # "user_id" in session and creator_id == session["user_id"]:
-            return render_template("create_recipe.html", recipe=recipe)
-        
-        # return forbidden
-        abort(403)
+        recipe = db_getRecipe(id)
+        print(recipe)
+        return render_template("create_recipe.html", recipe=recipe)
+
 
     # ///////////////////////
     #        RECIPES
@@ -66,34 +41,34 @@ def config_app(_app, _mysql):
     def getRecipes():
         # generate filter based on query string
         filter = dict()
-
+        
         filter["creatorID"] = request.args.get("user", None)
         filter["ingredient"] = request.args.get("ingredient", None)
 
         return jsonify(db_getAllRecipe(filter))
+    
+    @app.route("/recipe/detailed/<id>", methods=["GET"])
+    def getSingleRecipe(id):
+        return jsonify(db_getRecipe(id))
         
 
     @app.route("/recipe", methods=["POST"])
     def createRecipe():
-        # perform abort if POST request was made without being logged in
-        if not "user_id" in session:
-            abort(403)
+        post_data = request.get_json()
+        result = db_createRecipe(post_data)
         
-        # TODO
-        return 204
+        if result:
+            return "ok", 200
+
+        return "An error occurred", 404
+        
 
     @app.route("/recipe/<id>", methods=["PUT"])
     def updateRecipe(id):
-        # TODO Get the recipe and check the creator
-        creator_id = 0
-
-        if "user_id" in session and creator_id == session["user_id"]:
-            #TODO perform delete
-
-            return 204
+        recipe = request.get_json()
         
-        else:
-            abort(403) # forbidden
+        db_updateRecipe(id, recipe)
+        return "ok", 200
 
     @app.route("/recipe/<id>", methods=["DELETE"])
     def deleteRecipe(id):
@@ -104,15 +79,84 @@ def config_app(_app, _mysql):
         
 
     #####################################################################
-    # Recipe TODO
+    # Recipe
     #####################################################################
     def db_createRecipe(recipe):
-        # TODO
-        pass
+        
+        cursor = mysql.connection.cursor()
+        
+        # create recipe first
+        query = """
+        INSERT INTO Recipes (name, description, creatorID, dateCreated, private)
+        VALUES ('{}', '{}', {}, {}, {}) 
+        ;""".format(
+            recipe["name"],
+            recipe["description"],
+            recipe["creatorID"] if recipe["creatorID"] is not None and recipe["creatorID"] != "" else "NULL",
+            "CURDATE()",
+            "b'1'" if recipe["private"] else "b'0'"
+        )
+        print(query)
 
-    def db_updateRecipe(recipe):
-        # TODO
-        pass
+        cursor.execute(query)
+        recipe_id = cursor.lastrowid
+
+        ###
+        # create RecipeComponents to match
+
+        for ingredient in recipe["ingredients"]:
+            query = """
+            INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit, required)
+            VALUES ({}, {}, {}, '{}', {})
+            ;""".format(
+                recipe_id,
+                ingredient["id"],
+                ingredient["quantity"] if ingredient["quantity"] else 0,
+                ingredient["unit"] if ingredient["unit"] else "",
+                "b'1'" if ingredient["required"] else "b'0'"
+            )
+            cursor.execute(query)
+        
+
+        mysql.connection.commit()
+        
+        
+
+    def db_updateRecipe(id, recipe):
+        query = """
+        UPDATE Recipes SET name = '{}', description = '{}', creatorID = {}, private = {} WHERE recipeID = {};
+        """.format(
+            recipe["name"],
+            recipe["description"],
+            recipe["creatorID"] if recipe["creatorID"] is not None and recipe["creatorID"] != "" else "NULL",
+            "b'1'" if recipe["private"] else "b'0'",
+            int(id)
+        )
+        cursor = mysql.connection.cursor()
+        cursor.execute(query)
+
+        # because the modify page allows full manipulation of the recipe components, we will just delete all and readd all the new ones
+        query = """
+        DELETE FROM RecipeComponents WHERE recipeID = {};
+        """.format(id)
+        cursor.execute(query)
+
+        for ingredient in recipe["ingredients"]:
+            print(ingredient)
+            query = """
+            INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit, required)
+            VALUES ({}, {}, {}, '{}', {})
+            ;""".format(
+                id,
+                ingredient["id"],
+                ingredient["quantity"] if ingredient["quantity"] else 0,
+                ingredient["unit"] if ingredient["unit"] else "",
+                "b'1'" if ingredient["required"] else "b'0'"
+            )
+            print(query)
+            cursor.execute(query)
+
+        mysql.connection.commit()
 
     def db_getRecipe(id):
         """
@@ -121,7 +165,9 @@ def config_app(_app, _mysql):
         # get recipe data
         recipe_query = """
         SELECT Recipes.recipeID AS id, Recipes.description AS description, 
-        Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator
+        Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator,
+        Recipes.creatorID AS creatorID,
+        CAST(Recipes.private AS UNSIGNED) AS private
         FROM Recipes
         LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
         LEFT JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID
@@ -134,7 +180,8 @@ def config_app(_app, _mysql):
         # get ingredient data
         ingredient_query = """
         SELECT Ingredients.ingredientID AS id, Ingredients.name as name,
-        RecipeComponents.quantity as quantity, RecipeComponents.unit as unit, RecipeComponents.required as required
+        RecipeComponents.quantity as quantity, RecipeComponents.unit as unit,
+        CAST(RecipeComponents.required AS UNSIGNED) as required
         FROM Ingredients
         RIGHT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID
         WHERE RecipeComponents.recipeID = {}
@@ -155,21 +202,26 @@ def config_app(_app, _mysql):
         """
         
         creator_string = ""
-        if "creatorID" in filter and filter["creatorID"] is not None:
-            creator_string = "Recipe.creatorID = {}".format(filter["creatorID"])
+        if "creatorID" in filter and filter["creatorID"] is not None and filter["creatorID"] is not "":
+            creator_string = "Recipes.creatorID = {}".format(filter["creatorID"])
 
         ingredient_string = ""
-        if "ingredient" in filter and filter["ingredient"] is not None:
-            ingredient_string = "Ingredients.ingredientID = {}".format(filter["ingredient"])
+        if "ingredient" in filter and filter["ingredient"] is not None and filter["ingredient"] is not "":
+            ingredient_string = "RecipeComponents.ingredientID = {}".format(filter["ingredient"])
+
+        filters = []
+        if creator_string:
+            filters.append(creator_string)
+        if ingredient_string:
+            filters.append(ingredient_string)
 
         filter_string = ""
-        if creator_string !="" or ingredient_string != "":
-            filter_string = "WHERE " + "AND ".join([creator_string, ingredient_string])
+        if creator_string != "" or ingredient_string != "":
+            filter_string = "WHERE " + " AND ".join(filters)
 
-        print(filter)
-        
         query = """
-        SELECT Recipes.recipeID AS id, Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator, 
+        SELECT Recipes.recipeID AS id, Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator,
+        CAST(Recipes.private AS UNSIGNED) AS private, 
         COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count
         FROM Recipes
         LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
