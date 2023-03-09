@@ -180,5 +180,7 @@ document.getElementById("add_component").addEventListener("click", ()=>{
         headers: {
             'Content-Type': 'application/json'
         }
-    })
+    }).then(
+        location.reload()
+    )
 })
