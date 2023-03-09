@@ -15,7 +15,7 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 
 app.config['MYSQL_HOST'] = 'classmysql.engr.oregonstate.edu'
-app.config['MYSQL_USER'] = 'cs340_nguyech6'
+app.config['MYSQL_USER'] = USERNAME
 app.config['MYSQL_PASSWORD'] = PASSWORD
 app.config['MYSQL_DB'] = 'cs340_nguyech6'
 app.config['MYSQL_CURSORCLASS'] = "DictCursor"
