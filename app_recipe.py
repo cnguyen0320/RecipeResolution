@@ -220,9 +220,9 @@ def config_app(_app, _mysql):
             filter_string = "WHERE " + " AND ".join(filters)
 
         query = """
-        SELECT Recipes.recipeID AS id, Recipes.name AS name, Recipes.dateCreated AS date, Creators.username AS creator,
+        SELECT Recipes.recipeID AS id, Recipes.name AS name, COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count, Creators.username AS creator,
         CAST(Recipes.private AS UNSIGNED) AS private, 
-        COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count
+        Recipes.dateCreated AS date
         FROM Recipes
         LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
         LEFT JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID

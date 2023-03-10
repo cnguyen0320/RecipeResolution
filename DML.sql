@@ -30,75 +30,93 @@ INSERT INTO Passwords (creatorID, password) VALUES
 -- SELECT Operand
 
 -- Display all data from Recipes table
-SELECT * FROM Recipes;
+SELECT Recipes.recipeID AS id, Recipes.name AS name, COUNT(DISTINCT RecipeComponents.ingredientID) AS ingredient_count, Creators.username AS creator,
+CAST(Recipes.private AS UNSIGNED) AS private, 
+Recipes.dateCreated AS date
+FROM Recipes
+LEFT JOIN Creators ON Recipes.creatorID = Creators.creatorID
+LEFT JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID
+{}
+GROUP BY Recipes.recipeID
+;
 
--- +----------+-------------------+------------------------------------------------+-----------+-------------+---------+
--- | recipeID | name              | description                                    | creatorID | dateCreated | private |
--- +----------+-------------------+------------------------------------------------+-----------+-------------+---------+
--- |        1 | Lasagna           | Grandma's Italian recipe with mozarella cheese |         1 | 2020-03-19  | NULL    |
--- |        2 | Mac and Cheese    | 3 Cheese mac with chicken                      |         2 | 2022-11-17  | NULL    |
--- |        3 | Meatloaf          | Uncle Jim's Amish Meatloaf                     |         3 | 2017-06-06  | NULL    |
--- |        4 | Soy Sauce Chicken | Sous Vide marinated chicken                    |         4 | 2019-09-25  | NULL    |
--- +----------+-------------------+------------------------------------------------+-----------+-------------+---------+
+        -- +----+-------------------+------------------+-----------------+---------+------------+
+        -- | id | name              | ingredient_count | creator         | private | date       |
+        -- +----+-------------------+------------------+-----------------+---------+------------+
+        -- |  1 | Lasagna           |                1 | JohnDoe123      |    NULL | 2020-03-19 |
+        -- |  2 | Mac and Cheese    |                2 | KimOnAWhim789   |    NULL | 2022-11-17 |
+        -- |  3 | Meatloaf          |                2 | WillCook4Will99 |    NULL | 2017-06-06 |
+        -- |  4 | Soy Sauce Chicken |                2 | NULL            |       0 | 2019-09-25 |
+        -- +----+-------------------+------------------+-----------------+---------+------------+
 
--- Display name and description of content from Recipes table
-SELECT name, description FROM Recipes;
+-- Displays Ingredient id, name, and unique recipeCount
+SELECT Ingredients.ingredientID AS id, Ingredients.name AS name, COUNT(DISTINCT(RecipeComponents.recipeID)) AS recipeCount
+FROM Ingredients 
+LEFT JOIN RecipeComponents ON Ingredients.ingredientID = RecipeComponents.ingredientID 
+GROUP BY Ingredients.ingredientID
+{}
+ORDER BY Ingredients.name
+        -- +----+------------------+-------------+
+        -- | id | name             | recipeCount |
+        -- +----+------------------+-------------+
+        -- |  4 | Chicken          |           1 |
+        -- |  3 | Ground Beef      |           2 |
+        -- |  5 | Ketchup          |           1 |
+        -- |  2 | Mozarella Cheese |           1 |
+        -- |  6 | Soy Sauce        |           2 |
+        -- |  1 | Tomatos          |           0 |
+        -- +----+------------------+-------------+
 
-        -- +-------------------+------------------------------------------------+
-        -- | name              | description                                    |
-        -- +-------------------+------------------------------------------------+
-        -- | Lasagna           | Grandma's Italian recipe with mozarella cheese |
-        -- | Mac and Cheese    | 3 Cheese mac with chicken                      |
-        -- | Meatloaf          | Uncle Jim's Amish Meatloaf                     |
-        -- | Soy Sauce Chicken | Sous Vide marinated chicken                    |
-        -- +-------------------+------------------------------------------------+
+-- Displays username of Creators and how many recipes they have created
+SELECT Creators.creatorID AS id, Creators.username AS name, COUNT(Recipes.creatorID) AS recipe_count
+FROM Creators
+LEFT JOIN Recipes on Recipes.creatorID = Creators.creatorID
+GROUP BY Creators.creatorID;
 
--- Displays username and password of Creators
-SELECT Creators.username, Passwords.password FROM Creators
-INNER JOIN Passwords ON Creators.creatorID = Passwords.creatorID
+        -- +----+-----------------+--------------+
+        -- | id | name            | recipe_count |
+        -- +----+-----------------+--------------+
+        -- |  1 | JohnDoe123      |            1 |
+        -- |  2 | KimOnAWhim789   |            1 |
+        -- |  3 | WillCook4Will99 |            1 |
+        -- |  4 | JackAndJill     |            0 |
+        -- +----+-----------------+--------------+
+
+-- Displays Password with id, creator_name, password
+SELECT Creators.creatorID AS id, Creators.username AS creator_name, Passwords.password AS password 
+FROM Creators 
+INNER JOIN Passwords ON Creators.creatorID = Passwords.creatorID 
 ORDER BY username ASC;
 
-        -- +-----------------+-------------------+
-        -- | username        | password          |
-        -- +-----------------+-------------------+
-        -- | JamAndJosh4141  | judgejosh4food456 |
-        -- | JohnDoe123      | 123Password       |
-        -- | KimOnAWhim789   | Password456       |
-        -- | WillCook4Will99 | amishparadise123  |
-        -- +-----------------+-------------------+
+        -- +----+-----------------+------------------+
+        -- | id | creator_name    | password         |
+        -- +----+-----------------+------------------+
+        -- |  4 | JackAndJill     | jackandjill      |
+        -- |  1 | JohnDoe123      | 123Password      |
+        -- |  2 | KimOnAWhim789   | Password456      |
+        -- |  3 | WillCook4Will99 | amishparadise123 |
+        -- |  5 | yay             | yip              |
+        -- +----+-----------------+------------------+
 
--- Displays recipe name along with the Username and Data of who created it
-SELECT Recipes.name, Creators.username, Recipes.dateCreated FROM Recipes
-INNER JOIN Creators ON Recipes.creatorID = Creators.creatorID
-ORDER BY name ASC;
-
-        -- +-------------------+-----------------+-------------+
-        -- | name              | username        | dateCreated |
-        -- +-------------------+-----------------+-------------+
-        -- | Lasagna           | JohnDoe123      | 2020-03-19  |
-        -- | Mac and Cheese    | KimOnAWhim789   | 2022-11-17  |
-        -- | Meatloaf          | WillCook4Will99 | 2017-06-06  |
-        -- | Soy Sauce Chicken | JamAndJosh4141  | 2019-09-25  |
-        -- +-------------------+-----------------+-------------+
-
--- Displays name of Recipe with its ingredients and its measurements
-SELECT Recipes.name, RecipeComponents.quantity, RecipeComponents.unit, Ingredients.name FROM Recipes
-INNER JOIN RecipeComponents ON Recipes.recipeID = RecipeComponents.recipeID
-INNER JOIN Ingredients ON RecipeComponents.ingredientID = Ingredients.ingredientID
-ORDER BY Recipes.recipeID DESC;
-
-        -- +-------------------+-----------+-------+------------------+
-        -- | name              | quantity  | unit  | name             |
-        -- +-------------------+-----------+-------+------------------+
-        -- | Soy Sauce Chicken |   2.00000 | lbs   | Chicken          |
-        -- | Soy Sauce Chicken | 150.00000 | mLs   | Soy Sauce        |
-        -- | Meatloaf          | 800.00000 | grams | Ground Beef      |
-        -- | Meatloaf          | 250.00000 | grams | Ketchup          |
-        -- | Mac and Cheese    |   1.00000 | cup   | Mozarella Cheese |
-        -- | Lasagna           | 300.00000 | grams | Tomatos          |
-        -- | Lasagna           | 500.00000 | grams | Mozarella Cheese |
-        -- +-------------------+-----------+-------+------------------+
-
+-- Displays Recipe Components table with id, recipe_id, ingredient_id, quantity, unit, required, recipe_name, ingredient_name
+SELECT rc.componentID as id, rc.recipeID as recipe_id, rc.ingredientID as ingredient_id,
+rc.quantity as quantity, rc.unit as unit, CAST(rc.required AS UNSIGNED) as required,
+Recipes.name AS recipe_name, Ingredients.name AS ingredient_name
+FROM RecipeComponents rc
+LEFT JOIN Recipes ON Recipes.recipeID = rc.recipeID
+LEFT JOIN Ingredients ON Ingredients.ingredientID = rc.ingredientID
+ORDER BY id;
+        -- +----+-----------+---------------+-----------+-------+----------+-------------------+------------------+
+        -- | id | recipe_id | ingredient_id | quantity  | unit  | required | recipe_name       | ingredient_name  |
+        -- +----+-----------+---------------+-----------+-------+----------+-------------------+------------------+
+        -- |  2 |         2 |             2 |   1.00000 | cup   |     NULL | Mac and Cheese    | Mozarella Cheese |
+        -- |  3 |         3 |             3 | 800.00000 | grams |     NULL | Meatloaf          | Ground Beef      |
+        -- |  6 |         3 |             5 | 250.00000 | grams |     NULL | Meatloaf          | Ketchup          |
+        -- | 28 |         1 |             6 |   1.00000 |       |        1 | Lasagna           | Soy Sauce        |
+        -- | 39 |         2 |             3 |   1.00000 |       |        0 | Mac and Cheese    | Ground Beef      |
+        -- | 42 |         4 |             4 |   2.00000 | lbs   |        1 | Soy Sauce Chicken | Chicken          |
+        -- | 43 |         4 |             6 | 150.00000 | mLs   |        1 | Soy Sauce Chicken | Soy Sauce        |
+        -- +----+-----------+---------------+-----------+-------+----------+-------------------+------------------+
 ------------------------------------------------
 
 -- UPDATE Operand
@@ -117,6 +135,12 @@ UPDATE Creators
     SET username = :usernameInput
     WHERE creatorID = :creatoridInput;
 
+-- Update password of Password table where creatorID = ?
+UPDATE Passwords
+    SET password = :passwordInput
+    WHERE creatorID =:creatoridInput;
+
+-- No update query for RecipeComponents
 ------------------------------------------------
 
 -- DELETE Operand
