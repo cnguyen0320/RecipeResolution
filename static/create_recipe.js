@@ -206,8 +206,8 @@ let fill_creator_menu = (data) =>{
 
     for(row of data){
         option = document.createElement("option")
-        option.value= row.creatorID,
-        option.innerHTML = row.username
+        option.value= row.id,
+        option.innerHTML = row.name
         
         // build arrays for option elements and values
         options.appendChild(option)
