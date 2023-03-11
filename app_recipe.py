@@ -55,12 +55,13 @@ def config_app(_app, _mysql):
     @app.route("/recipe", methods=["POST"])
     def createRecipe():
         post_data = request.get_json()
-        result = db_createRecipe(post_data)
+        try:
+            db_createRecipe(post_data)
         
-        if result:
             return "ok", 200
-
-        return "An error occurred", 404
+        
+        except:
+            return "An error occurred", 404
         
 
     @app.route("/recipe/<id>", methods=["PUT"])
@@ -96,7 +97,6 @@ def config_app(_app, _mysql):
             "CURDATE()",
             "b'1'" if recipe["private"] else "b'0'"
         )
-        print(query)
 
         cursor.execute(query)
         recipe_id = cursor.lastrowid
