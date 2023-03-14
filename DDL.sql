@@ -54,25 +54,25 @@ CREATE OR REPLACE TABLE `Passwords` (
 );
 
 -- // Insert Data into Recipes Table//
-INSERT INTO Recipes (name, description, creatorID, dateCreated) VALUES
-('Lasagna', "Grandma's Italian recipe with mozarella cheese", 1, '2020-03-19'),
-('Mac and Cheese', '3 Cheese mac with chicken', 2, '2022-11-17'),
-('Meatloaf', "Uncle Jim's Amish Meatloaf", 3, '2017-06-06'),
-('Soy Sauce Chicken', 'Sous Vide marinated chicken', 4, '2019-09-25'),
-('Mac & Cheese', 'Classic comfort food', 3, '2019-02-22');
+INSERT INTO Recipes (name, description, creatorID, dateCreated, private) VALUES
+('Lasagna', "Grandma's Italian recipe with mozarella cheese", 1, '2020-03-19', 0),
+('Mac and Cheese', '3 Cheese mac with chicken', 2, '2022-11-17', 0),
+('Meatloaf', "Uncle Jim's Amish Meatloaf", 3, '2017-06-06', 0),
+('Soy Sauce Chicken', 'Sous Vide marinated chicken', 4, '2019-09-25', 0),
+('Mac & Cheese', 'Classic comfort food', 3, '2019-02-22', 1);
 
 -- // Insert Data into RecipeComponents Table//
-INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit) VALUES
-(1, 1, 300, 'grams'),
-(2, 2, 1, 'cup'),
-(3, 3, 800, 'grams'),
-(4, 4, 2, 'lbs'),
-(1, 2, 500, 'grams'),
-(3, 5, 250, 'grams'),
-(4, 6, 150, 'mLs'),
-(5, 2, 6, 'oz'),
-(5, 7, 0.5, 'cup'),
-(5, 6, 1, 'cup');
+INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit, required) VALUES
+(1, 1, 300, 'grams', 1),
+(2, 2, 1, 'cup', 1),
+(3, 3, 800, 'grams', 1),
+(4, 4, 2, 'lbs', 1),
+(1, 2, 500, 'grams', 1),
+(3, 5, 250, 'grams', 1),
+(4, 6, 150, 'mLs', 1),
+(5, 2, 6, 'oz', 1),
+(5, 7, 0.5, 'cup', 1),
+(5, 8, 1, 'cup', 1);
 
 
 

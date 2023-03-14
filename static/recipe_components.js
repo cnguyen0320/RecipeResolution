@@ -192,7 +192,7 @@ document.getElementById("add_component").addEventListener("click", ()=>{
             let err_msg = "An error occurred"
 
             // show error
-            document.getElementById("error_message").innerHTML = err_msg
+            alert(err_msg)
         }
     })
 })
