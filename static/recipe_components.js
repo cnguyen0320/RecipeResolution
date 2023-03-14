@@ -158,7 +158,7 @@ document.getElementById("add_component").addEventListener("click", ()=>{
     let recipeId = parseInt(document.getElementById("recipe_select").value)
     let ingredientID = parseInt(document.getElementById("ingredient_select").value)
     let quantity = parseFloat(document.getElementById("add_qty").value)
-    let unit = document.getElementById("add_unit".value)
+    let unit = document.getElementById("add_unit").value
     let require = parseInt(document.getElementById("require_select").value)
 
     // validate
