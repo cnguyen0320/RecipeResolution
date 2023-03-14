@@ -34,7 +34,7 @@ CREATE OR REPLACE TABLE `RecipeComponents` (
 -- //Creators Table//
 CREATE OR REPLACE TABLE `Creators` (
     `creatorID` int AUTO_INCREMENT UNIQUE NOT NULL,
-    `username` varchar(255) NOT NULL,
+    `username` varchar(255) UNIQUE NOT NULL,
     PRIMARY KEY (creatorID)
 );
 
