@@ -26,6 +26,7 @@ CREATE OR REPLACE TABLE `RecipeComponents` (
     `unit` varchar(255) NOT NULL,
     `required` BIT,
     PRIMARY KEY (componentID),
+    UNIQUE (recipeID, ingredientID),
     FOREIGN KEY (recipeID) REFERENCES Recipes(recipeID) ON DELETE CASCADE,
     FOREIGN KEY (ingredientID) REFERENCES Ingredients(ingredientID) ON DELETE CASCADE
 );
@@ -57,7 +58,8 @@ INSERT INTO Recipes (name, description, creatorID, dateCreated) VALUES
 ('Lasagna', "Grandma's Italian recipe with mozarella cheese", 1, '2020-03-19'),
 ('Mac and Cheese', '3 Cheese mac with chicken', 2, '2022-11-17'),
 ('Meatloaf', "Uncle Jim's Amish Meatloaf", 3, '2017-06-06'),
-('Soy Sauce Chicken', 'Sous Vide marinated chicken', 4, '2019-09-25');
+('Soy Sauce Chicken', 'Sous Vide marinated chicken', 4, '2019-09-25'),
+('Mac & Cheese', 'Classic comfort food', 3, '2019-02-22');
 
 -- // Insert Data into RecipeComponents Table//
 INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit) VALUES
@@ -67,7 +69,12 @@ INSERT INTO RecipeComponents (recipeID, ingredientID, quantity, unit) VALUES
 (4, 4, 2, 'lbs'),
 (1, 2, 500, 'grams'),
 (3, 5, 250, 'grams'),
-(4, 6, 150, 'mLs');
+(4, 6, 150, 'mLs'),
+(5, 2, 6, 'oz'),
+(5, 7, 0.5, 'cup'),
+(5, 6, 1, 'cup');
+
+
 
 -- // Insert Data into Creators Table//
 INSERT INTO Creators (username) VALUES
@@ -83,7 +90,9 @@ INSERT INTO Ingredients (name) VALUES
 ('Ground Beef'),
 ('Chicken'),
 ('Ketchup'),
-('Soy Sauce');
+('Soy Sauce'),
+('Milk'),
+('Macaroni');
 
 -- // Insert Data into Passwords Table//
 INSERT INTO Passwords (creatorID, password) VALUES
